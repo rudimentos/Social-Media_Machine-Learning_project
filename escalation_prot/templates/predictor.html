@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escalation Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#f4f1ea; --ink:#1c1a17; --muted:#6c655b; --line:#d8d2c6;
+    --card:#fbf9f4; --card-2:#ffffff;
+    --rust:#9a3b2e; --rust-soft:#c97b6a;
+    --teal:#3c5a63; --teal-soft:#6f95a0;
+    --amber:#b8862f;
+    --side:#181613; --side-line:#2e2a25; --side-ink:#cfc7ba; --side-mut:#8a8175;
+    --shadow:0 1px 0 rgba(28,26,23,.05), 0 10px 34px rgba(28,26,23,.07);
+    --serif:'Fraunces',Georgia,serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--serif);
+    -webkit-font-smoothing:antialiased;display:flex;min-height:100%}
+
+  /* ---------------- sidebar ---------------- */
+  .side{width:248px;flex:0 0 248px;background:var(--side);color:var(--side-ink);
+    display:flex;flex-direction:column;padding:26px 20px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:34px;
+    animation:fade .6s ease both}
+  .mark{width:34px;height:34px;border-radius:9px;flex:0 0 34px;position:relative;
+    background:radial-gradient(circle at 30% 30%,var(--rust-soft),var(--rust));
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+  .mark::after{content:"";position:absolute;inset:9px;border-radius:50%;
+    border:2px solid rgba(244,241,234,.85);border-right-color:transparent;transform:rotate(20deg)}
+  .brand h1{font-size:16px;font-weight:600;letter-spacing:-.01em;margin:0;color:#f4f1ea;line-height:1.2}
+  .brand small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--side-mut);margin-top:3px}
+
+  nav{display:flex;flex-direction:column;gap:3px}
+  .nav-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--side-mut);margin:6px 8px 10px}
+  .nav a{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--side-ink);
+    font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:9px;
+    transition:background .18s,color .18s;animation:slidein .5s ease both}
+  .nav a .ic{width:16px;height:16px;opacity:.7}
+  .nav a:hover{background:rgba(255,255,255,.05)}
+  .nav a.active{background:var(--rust);color:#fff}
+  .nav a.active .ic{opacity:1}
+  .nav a:nth-child(2){animation-delay:.05s}
+  .nav a:nth-child(3){animation-delay:.1s}
+  .side-foot{margin-top:auto;font-family:var(--mono);font-size:10px;line-height:1.7;
+    color:var(--side-mut);border-top:1px solid var(--side-line);padding-top:16px}
+
+  /* ---------------- main ---------------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:auto}
+  .topbar{position:sticky;top:0;z-index:5;background:rgba(244,241,234,.86);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+    padding:22px 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+  .topbar .tt h2{font-family:var(--serif);font-weight:800;font-size:27px;margin:0;letter-spacing:-.015em}
+  .topbar .tt p{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:5px 0 0;
+    text-transform:uppercase;letter-spacing:.07em}
+  .seg{display:none;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
+  .seg.show{display:inline-flex}
+  .seg button{border:0;background:transparent;font-family:var(--mono);font-size:12px;
+    padding:8px 15px;cursor:pointer;color:var(--muted)}
+  .seg button.on{background:var(--ink);color:var(--canvas)}
+
+  .content{padding:34px 40px 90px;max-width:1180px;width:100%}
+  @media(max-width:920px){
+    body{flex-direction:column}
+    .side{width:auto;flex:none;height:auto;position:static;flex-direction:row;
+      align-items:center;padding:14px 18px;gap:20px}
+    .brand{margin:0}.side-foot{display:none}.nav-h{display:none}
+    nav{flex-direction:row;margin-left:auto}
+    .main{height:auto}.topbar{padding:18px 22px}.content{padding:24px 22px 80px}
+  }
+
+  /* ---------------- mode select ---------------- */
+  .lead{font-size:18px;line-height:1.6;max-width:640px;margin:4px 0 26px;color:#332f2a}
+  .lead b{font-weight:600}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:760px}
+  @media(max-width:680px){.cards{grid-template-columns:1fr}}
+  .choice{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:24px;cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s;
+    box-shadow:var(--shadow);animation:rise .5s ease both}
+  .choice:nth-child(2){animation-delay:.07s}
+  .choice:hover{transform:translateY(-4px);border-color:var(--rust-soft)}
+  .choice .num{font-family:var(--mono);font-size:11px;color:var(--rust);letter-spacing:.12em}
+  .choice h3{font-family:var(--serif);font-size:21px;font-weight:600;margin:12px 0 8px}
+  .choice p{font-size:14.5px;line-height:1.55;color:var(--muted);margin:0}
+  .choice .go{font-family:var(--mono);font-size:12px;margin-top:16px;color:var(--ink);
+    display:inline-flex;align-items:center;gap:7px}
+
+  /* ---------------- workspace ---------------- */
+  .mode{display:none}.mode.show{display:block;animation:fade .4s ease both}
+  .work{display:grid;grid-template-columns:1.05fr .95fr;gap:26px}
+  @media(max-width:980px){.work{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:13px;
+    padding:22px;box-shadow:var(--shadow)}
+  .panel > h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.12em;
+    color:var(--muted);margin:0 0 16px;font-weight:600;display:flex;align-items:center;gap:10px}
+  .panel > h4 .dot{width:7px;height:7px;border-radius:50%;background:var(--rust)}
+
+  .srcrow{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+  .pill{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:var(--card-2);
+    color:var(--muted);padding:7px 13px;border-radius:999px;cursor:pointer}
+  .pill.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .mini{font-family:var(--mono);font-size:11.5px;border:1px solid var(--ink);background:transparent;
+    color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer}
+  .mini:hover{background:var(--ink);color:var(--canvas)}
+
+  /* chat */
+  .chat{display:flex;flex-direction:column;gap:11px;margin-bottom:14px}
+  .bubble{max-width:88%;border-radius:13px;padding:11px 14px;font-size:14.5px;line-height:1.5;position:relative}
+  .bubble .who{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+    margin-bottom:5px;opacity:.7}
+  .bubble.cust{align-self:flex-start;background:#eef2f2;border:1px solid #d7e0e0;border-bottom-left-radius:4px}
+  .bubble.cust .who{color:var(--teal)}
+  .bubble.agent{align-self:flex-end;background:#f6e9e5;border:1px solid #ecd2ca;border-bottom-right-radius:4px}
+  .bubble.agent .who{color:var(--rust)}
+  .bubble.edit{width:100%;max-width:100%;background:var(--card-2);border:1px dashed var(--line)}
+  .bubble textarea{width:100%;border:0;background:transparent;resize:vertical;min-height:46px;
+    font-family:var(--serif);font-size:14.5px;color:var(--ink);outline:none}
+  .bubble .rm{position:absolute;top:8px;right:10px;border:0;background:transparent;color:var(--muted);
+    cursor:pointer;font-size:16px;line-height:1}.bubble .rm:hover{color:var(--rust)}
+
+  .addrow{display:flex;gap:8px;flex-wrap:wrap}
+  .gapwrap{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .gapwrap input,.hourwrap input{width:58px;font-family:var(--mono);border:1px solid var(--line);
+    border-radius:6px;padding:5px 7px;background:var(--card-2);color:var(--ink)}
+  .hourwrap{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:12px}
+
+  /* result panel */
+  .res-empty{font-size:14px;color:var(--muted);font-style:italic;line-height:1.6}
+  .gauge{display:flex;align-items:flex-end;gap:13px;margin-bottom:3px}
+  .gauge .big{font-family:var(--mono);font-size:44px;font-weight:600;letter-spacing:-.02em;line-height:1}
+  .band{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.12em;
+    padding:4px 11px;border-radius:999px;margin-bottom:6px}
+  .band.high{background:var(--rust);color:#fff}
+  .band.moderate{background:var(--amber);color:#fff}
+  .band.low{background:var(--teal);color:#fff}
+  .gsub{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .meter{height:11px;border-radius:999px;margin:13px 0 18px;overflow:hidden;
+    background:linear-gradient(90deg,#e7efef,#f0e7d9,#f3e0da);position:relative;border:1px solid var(--line)}
+  .meter>i{position:absolute;top:0;bottom:0;left:0;border-radius:999px;
+    background:linear-gradient(90deg,var(--teal),var(--amber),var(--rust));
+    transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .meter .needle{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+
+  .subbars{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+  .sb{background:var(--card-2);border:1px solid var(--line);border-radius:10px;padding:12px 13px}
+  .sb .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .sb .v{font-family:var(--mono);font-size:22px;margin-top:4px}
+  .sb .t{height:6px;border-radius:999px;background:#ece6da;margin-top:8px;overflow:hidden}
+  .sb .t>i{display:block;height:100%;border-radius:999px;transition:width .5s ease}
+  .sb.reply .t>i{background:var(--rust-soft)} .sb.incoming .t>i{background:var(--teal-soft)}
+
+  .drv-h{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 12px}
+  .drv{border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-bottom:9px;background:var(--card-2);
+    animation:rise .4s ease both}
+  .drv .top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+  .drv .nm{font-weight:600;font-size:14.5px}
+  .tag{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+    padding:2px 7px;border-radius:5px}
+  .tag.reply{background:#f6e9e5;color:var(--rust)} .tag.incoming{background:#eef2f2;color:var(--teal)}
+  .drv .rate{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .drv .adv{font-size:13.5px;line-height:1.5;color:#4a443d}
+  .drv .pmeter{height:4px;background:#ece6da;border-radius:999px;margin-top:9px;overflow:hidden}
+  .drv .pmeter>i{display:block;height:100%;background:var(--rust);border-radius:999px}
+
+  .layerb{border:1px solid var(--line);border-radius:10px;padding:13px;margin-top:16px;background:var(--card-2)}
+  .layerb .h{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .layerb .p{font-family:var(--mono);font-size:24px}
+  .layerb .note{font-size:12.5px;color:var(--muted);font-style:italic;line-height:1.5;margin-top:6px}
+  .layerb.withheld .p{color:var(--muted);font-size:14px;font-style:italic}
+
+  .foot-note{font-size:12px;color:var(--muted);font-style:italic;line-height:1.55;
+    margin-top:18px;border-top:1px solid var(--line);padding-top:13px}
+
+  /* mode 2 reveal */
+  .reveal{margin-top:22px;border:1px solid var(--line);border-radius:13px;padding:22px;
+    background:var(--card);box-shadow:var(--shadow);display:none}
+  .reveal.show{display:block;animation:rise .45s ease both}
+  .reveal h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 14px}
+  .outcome{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12px;
+    padding:7px 13px;border-radius:999px;margin-bottom:14px}
+  .outcome.esc{background:var(--rust);color:#fff} .outcome.ok{background:var(--teal);color:#fff}
+  .cmp{font-size:13.5px;color:#4a443d;line-height:1.6;margin-bottom:14px}
+
+  .demo-flag{font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:.06em;
+    border:1px dashed var(--amber);border-radius:7px;padding:6px 10px;display:none;margin-bottom:16px}
+  .demo-flag.show{display:inline-block}
+
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes slidein{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="side">
+    <div class="brand">
+      <div class="mark"></div>
+      <div>
+        <h1>Escalation Lab</h1>
+        <small>Support Analytics</small>
+      </div>
+    </div>
+    <div class="nav-h">Workspace</div>
+    <nav class="nav">
+      <a href="/dashboard"><span class="ic">▦</span> Dashboard</a>
+      <a href="/predictor" class="active"><span class="ic">◆</span> Predictor</a>
+    </nav>
+    <div class="side-foot">
+      Escalation detection framework<br>Linguistic &amp; conversation-level<br>analysis · prototype
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <div class="main">
+    <div class="topbar">
+      <div class="tt">
+        <h2 id="pageTitle">Predictor</h2>
+        <p id="pageSub">Coaching tool · escalation pressure from drivers</p>
+      </div>
+      <div class="seg" id="modeSeg">
+        <button data-m="start" class="on">From the start</button>
+        <button data-m="middle">In the middle</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="demo-flag" id="demoFlag">demo data — live version reads the dataset &amp; backend model</div>
+
+      <!-- ---------- MODE SELECT ---------- -->
+      <section id="select">
+        <p class="lead">Practise handling a support conversation and see how your wording
+          moves the <b>escalation pressure</b>. Choose where to begin.</p>
+        <div class="cards">
+          <button class="choice" data-m="start">
+            <div class="num">MODE 01</div>
+            <h3>From the start</h3>
+            <p>Open with a dataset message or write your own, then build the thread turn by
+              turn — your replies and the customer's. Pressure updates live.</p>
+            <span class="go">Begin →</span>
+          </button>
+          <button class="choice" data-m="middle">
+            <div class="num">MODE 02</div>
+            <h3>Jump into the middle</h3>
+            <p>A real thread is pulled at random. You see the first three turns and write the
+              agent's reply. Then reveal what actually happened.</p>
+            <span class="go">Begin →</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ---------- MODE 1: FROM START ---------- -->
+      <section class="mode" id="modeStart">
+        <div class="work">
+          <div class="panel">
+            <h4><span class="dot"></span> Conversation</h4>
+            <div class="srcrow">
+              <span class="pill on" id="srcDataset">Dataset opener</span>
+              <span class="pill" id="srcManual">Write your own</span>
+              <button class="mini" id="shuffleRoot" style="margin-left:auto">⟳ shuffle opener</button>
+            </div>
+            <div class="chat" id="startChat"></div>
+            <div class="addrow">
+              <button class="mini" id="addAgent">+ Agent reply</button>
+              <button class="mini" id="addCust">+ Customer message</button>
+            </div>
+            <div class="hourwrap">conversation start hour
+              <input type="number" id="startHour" min="0" max="23" value="12">
+              <span style="margin-left:6px">(for response-lag &amp; out-of-hours features)</span>
+            </div>
+          </div>
+          <div class="panel">
+            <h4><span class="dot"></span> Escalation read</h4>
+            <div id="startRes"><p class="res-empty">Add at least one agent reply to see the
+              pressure read. It recomputes as you type.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- MODE 2: IN THE MIDDLE ---------- -->
+      <section class="mode" id="modeMiddle">
+        <div class="work">
+          <div class="panel">
+            <h4><span class="dot"></span> The thread so far
+              <button class="mini" id="newMiddle" style="margin-left:auto">⟳ new thread</button>
+            </h4>
+            <div class="chat" id="middleChat"></div>
+            <div class="bubble agent edit" style="max-width:100%">
+              <div class="who">Your turn — agent reply (turn 4)</div>
+              <textarea id="middleReply" placeholder="Write how you'd respond…"></textarea>
+            </div>
+            <div class="addrow" style="margin-top:12px">
+              <button class="mini" id="evalMiddle">Evaluate my reply →</button>
+              <button class="mini" id="revealBtn">Reveal what really happened</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h4><span class="dot"></span> Escalation read</h4>
+            <div id="middleRes"><p class="res-empty">Write a reply and click evaluate.</p></div>
+          </div>
+        </div>
+        <div class="reveal" id="reveal">
+          <h4>What actually happened</h4>
+          <div id="revealBody"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+<script>
+/* ============================================================
+   Demo data — replaced at runtime by the dataset / backend.
+   Lets the page be fully clickable without a server.
+   ============================================================ */
+const DEMO_ROOTS = [
+  "I've been charged twice for my subscription this month. Can you sort this out?",
+  "My delivery still hasn't arrived and it's been two weeks now.",
+  "App keeps logging me out every few minutes, it's driving me mad.",
+  "Why has my account been suspended with no warning?"
+];
+const DEMO_MIDDLES = [
+  {
+    prompt_turns:[
+      {inbound:true, text:"I've been charged twice for my subscription and I want a refund."},
+      {inbound:false,text:"We're sorry to hear that. Could you confirm the email on your account?"},
+      {inbound:true, text:"It's the same one I'm messaging from. This has happened twice now, it's not good enough."}
+    ],
+    real_continuation:[
+      {inbound:false,text:"Unfortunately refunds are handled by our billing department. Kindly contact them via the form and they'll be in touch."},
+      {inbound:true, text:"Unbelievable. I'm cancelling."}
+    ],
+    escalated:1
+  },
+  {
+    prompt_turns:[
+      {inbound:true, text:"My order arrived damaged. What can you do?"},
+      {inbound:false,text:"Oh no, sorry about that! I can get a replacement shipped today, no charge."},
+      {inbound:true, text:"Oh great, thank you. How long will it take?"}
+    ],
+    real_continuation:[
+      {inbound:false,text:"It'll be with you in 2 working days and I've added tracking to your account now."},
+      {inbound:true, text:"Perfect, thanks for sorting it so fast!"}
+    ],
+    escalated:0
+  }
+];
+
+let USE_DEMO = false;            // flips true if backend calls fail
+let mode = 'start';
+let startTurns = [];             // [{inbound,text,gap_min}]
+let middle = null;               // current middle thread
+let revealed = false;
+
+/* ---------- backend calls (with demo fallback) ---------- */
+async function apiScore(turns, startHour){
+  try{
+    const r = await fetch('/api/score',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({turns,start_hour:startHour})});
+    if(!r.ok) throw new Error('bad status');
+    return await r.json();
+  }catch(e){ USE_DEMO=true; flagDemo(); return demoScore(turns); }
+}
+async function fetchRoot(){
+  try{
+    const r = await fetch('/api/root'); if(!r.ok) throw 0;
+    return (await r.json()).opening_text;
+  }catch(e){ USE_DEMO=true; flagDemo(); return DEMO_ROOTS[Math.floor(Math.random()*DEMO_ROOTS.length)]; }
+}
+async function fetchMiddle(){
+  try{
+    const r = await fetch('/api/middle'); if(!r.ok) throw 0;
+    return await r.json();
+  }catch(e){ USE_DEMO=true; flagDemo(); return DEMO_MIDDLES[Math.floor(Math.random()*DEMO_MIDDLES.length)]; }
+}
+function flagDemo(){ document.getElementById('demoFlag').classList.add('show'); }
+
+/* ---------- demo scoring (mirror of scoring.py shape, rough heuristic) ---------- */
+function demoScore(turns){
+  const txt = t=>t.text.toLowerCase();
+  const agent = turns.filter(t=>!t.inbound), cust = turns.filter(t=>t.inbound);
+  const has = (arr,words)=>arr.some(t=>words.some(w=>txt(t).includes(w)));
+  const C=[];
+  let reply=0, incoming=0;
+  function add(side,label,key,active,pts,esc,non,adv){
+    if(active>0||key==='out_formality_mean'){C.push({key,label,side,activation:active,points:pts,esc_rate:esc,non_rate:non,advice:adv,value:active});}
+    if(side==='reply')reply+=pts; else if(side==='incoming')incoming+=pts;
+  }
+  const defl=has(agent,['unable','cannot',"can't",'policy','procedure','department','contact','terms']);
+  add('reply','Deflection language','out_deflection_any',defl?1:0,defl?0.127:0,0.315,0.172,
+    "Avoid 'unable', 'cannot', 'policy', 'contact another department'. Threads with deflection escalated almost twice as often.");
+  const bur=has(agent,['kindly','patience','appreciate','investigate','flag','advised']);
+  add('reply','Bureaucratic language','out_bureaucratic_any',bur?1:0,bur?0.114:0,0.207,0.103,
+    "Avoid 'kindly', 'we appreciate your patience', 'we have flagged this'.");
+  add('reply','Formality score (F-score)','out_formality_mean',0,0,null,null,
+    "Tested but NOT a significant predictor (p=0.275). Shown for completeness; no weight.");
+  const intent=has(cust,['cancel','refund','lawyer','legal','switching','chargeback']);
+  add('incoming','Escalation-intent terms','inb_intent_any',intent?1:0,intent?0.102:0,0.118,0.050,
+    "Customer used terms like 'cancel', 'refund', 'lawyer'. Baseline risk is higher.");
+  const frus=has(cust,['unacceptable','useless','ridiculous','disgusting','terrible','furious','not good enough','unbelievable']);
+  add('incoming','Frustration terms','inb_frustration_any',frus?1:0,frus?0.106:0,0.112,0.044,
+    "Customer used strong negative terms. Baseline risk elevated.");
+  const REPLY_MAX=0.127+0.114+0.103+0.064+0.250+0.675+0, INC_MAX=0.102+0.106;
+  const rp=Math.round(100*reply/REPLY_MAX*10)/10, ip=Math.round(100*incoming/INC_MAX*10)/10;
+  const overall=Math.round((0.65*rp+0.35*ip)*10)/10;
+  const band=overall>=55?'high':overall>=25?'moderate':'low';
+  C.sort((a,b)=>b.points-a.points);
+  const nturns=turns.length, nagent=agent.length;
+  let layer_b;
+  if(nturns>=4){layer_b={available:true,probability:Math.min(.95,.15+overall/130),
+    note:"Secondary signal from the trained XGBoost model. Indicative only."};}
+  else{layer_b={available:false,note:"Model probability withheld until 4 turns — below that the thread-level features are not meaningfully defined."};}
+  return{overall_pressure:overall,band,reply_pressure:rp,incoming_pressure:ip,contributions:C,layer_b,
+    blend_note:"Overall = 0.65 × reply pressure + 0.35 × incoming pressure. A transparent index of step-9 drivers, NOT a probability."};
+}
+
+/* ---------- rendering ---------- */
+function bubble(t){
+  return `<div class="bubble ${t.inbound?'cust':'agent'}">
+    <div class="who">${t.inbound?'Customer':'Agent'}</div>${escapeHtml(t.text)}</div>`;
+}
+function escapeHtml(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+function renderResult(d){
+  if(!d) return '<p class="res-empty">—</p>';
+  const baseRate = d.layer_b && d.layer_b.probability!=null ? '' : '';
+  const drv = d.contributions.map((c,i)=>{
+    const rate = (c.esc_rate!=null&&c.non_rate!=null)
+      ? `${(c.esc_rate*100).toFixed(1)}% vs ${(c.non_rate*100).toFixed(1)}%` : '';
+    const pw = d.contributions[0].points>0 ? (c.points/d.contributions[0].points*100) : 0;
+    return `<div class="drv" style="animation-delay:${i*0.04}s">
+      <div class="top">
+        <span class="nm">${c.label}</span>
+        <span class="tag ${c.side}">${c.side}</span>
+        <span class="rate">${rate}</span>
+      </div>
+      <div class="adv">${c.advice}</div>
+      <div class="pmeter"><i style="width:${Math.max(0,pw)}%"></i></div>
+    </div>`;
+  }).join('');
+
+  let lb='';
+  if(d.layer_b){
+    if(d.layer_b.available){
+      lb=`<div class="layerb"><div class="h">Model probability (secondary)</div>
+        <div class="p">${(d.layer_b.probability*100).toFixed(1)}%</div>
+        <div class="note">${d.layer_b.note}</div></div>`;
+    }else{
+      lb=`<div class="layerb withheld"><div class="h">Model probability (secondary)</div>
+        <div class="p">withheld</div><div class="note">${d.layer_b.note}</div></div>`;
+    }
+  }
+
+  return `
+    <div class="gauge">
+      <span class="big">${d.overall_pressure}</span>
+      <span class="band ${d.band}">${d.band} pressure</span>
+    </div>
+    <div class="gsub">transparent driver index · 0–100</div>
+    <div class="meter"><i style="width:${d.overall_pressure}%"></i>
+      <span class="needle" style="left:55%"></span></div>
+    <div class="subbars">
+      <div class="sb reply"><div class="lbl">Reply pressure</div><div class="v">${d.reply_pressure}</div>
+        <div class="t"><i style="width:${d.reply_pressure}%"></i></div></div>
+      <div class="sb incoming"><div class="lbl">Incoming pressure</div><div class="v">${d.incoming_pressure}</div>
+        <div class="t"><i style="width:${d.incoming_pressure}%"></i></div></div>
+    </div>
+    <div class="drv-h">Contributing drivers (escalated vs resolved rates)</div>
+    ${drv || '<p class="res-empty">No escalation drivers detected in the current text.</p>'}
+    ${lb}
+    <div class="foot-note">${d.blend_note} Findings express association, not causation.</div>`;
+}
+
+/* ---------- MODE 1 logic ---------- */
+function renderStartChat(){
+  const box=document.getElementById('startChat'); box.innerHTML='';
+  startTurns.forEach((t,i)=>{
+    const div=document.createElement('div');
+    div.className=`bubble ${t.inbound?'cust':'agent'} edit`;
+    div.innerHTML=`<button class="rm" title="remove">×</button>
+      <div class="who">${t.inbound?'Customer':'Agent'} · gap
+        <input class="gapin" type="number" min="0" value="${t.gap_min}" style="width:48px"> min</div>
+      <textarea>${escapeHtml(t.text)}</textarea>`;
+    div.querySelector('.rm').onclick=()=>{startTurns.splice(i,1);renderStartChat();scoreStart();};
+    div.querySelector('textarea').oninput=e=>{t.text=e.target.value;scoreStartDebounced();};
+    div.querySelector('.gapin').oninput=e=>{t.gap_min=parseFloat(e.target.value)||0;scoreStartDebounced();};
+    box.appendChild(div);
+  });
+}
+let stTimer;
+function scoreStartDebounced(){clearTimeout(stTimer);stTimer=setTimeout(scoreStart,450);}
+async function scoreStart(){
+  const res=document.getElementById('startRes');
+  if(!startTurns.some(t=>!t.inbound && t.text.trim())){
+    res.innerHTML='<p class="res-empty">Add at least one agent reply with text to see the pressure read.</p>';return;
+  }
+  const d=await apiScore(startTurns,parseInt(document.getElementById('startHour').value)||12);
+  res.innerHTML=renderResult(d);
+}
+
+/* ---------- MODE 2 logic ---------- */
+function renderMiddleChat(){
+  const box=document.getElementById('middleChat');
+  box.innerHTML=middle.prompt_turns.map(bubble).join('');
+}
+async function loadMiddle(){
+  middle=await fetchMiddle(); revealed=false;
+  document.getElementById('middleReply').value='';
+  document.getElementById('middleRes').innerHTML='<p class="res-empty">Write a reply and click evaluate.</p>';
+  document.getElementById('reveal').classList.remove('show');
+  renderMiddleChat();
+}
+async function evalMiddle(){
+  const reply=document.getElementById('middleReply').value.trim();
+  if(!reply){document.getElementById('middleRes').innerHTML='<p class="res-empty">Write a reply first.</p>';return;}
+  const turns=[...middle.prompt_turns.map((t,i)=>({inbound:t.inbound,text:t.text,gap_min:i?5:0})),
+               {inbound:false,text:reply,gap_min:8}];
+  const d=await apiScore(turns,12);
+  document.getElementById('middleRes').innerHTML=renderResult(d);
+}
+function doReveal(){
+  const out=middle.escalated===1;
+  const cont=middle.real_continuation.map(bubble).join('');
+  document.getElementById('revealBody').innerHTML=`
+    <div class="outcome ${out?'esc':'ok'}">${out?'● This thread escalated':'● This thread resolved'}</div>
+    <div class="cmp">The real agent continued the thread as below. Compare the wording against the
+      drivers flagged in your read — note where the real reply did or didn't trigger them.</div>
+    <div class="chat">${cont}</div>`;
+  document.getElementById('reveal').classList.add('show');
+  document.getElementById('reveal').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ---------- mode switching ---------- */
+function setMode(m){
+  mode=m;
+  document.getElementById('select').style.display='none';
+  document.getElementById('modeSeg').classList.add('show');
+  document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  document.getElementById('modeStart').classList.toggle('show',m==='start');
+  document.getElementById('modeMiddle').classList.toggle('show',m==='middle');
+  document.getElementById('pageSub').textContent =
+    m==='start' ? 'Mode 01 · build a thread from the opening message'
+                : 'Mode 02 · reply to a real thread, then reveal the outcome';
+  if(m==='middle' && !middle) loadMiddle();
+}
+
+/* ---------- wire up ---------- */
+document.querySelectorAll('[data-m]').forEach(el=>{
+  if(el.tagName==='BUTTON' && el.closest('#modeSeg')) el.onclick=()=>setMode(el.dataset.m);
+});
+document.querySelectorAll('.choice').forEach(c=>c.onclick=()=>setMode(c.dataset.m));
+
+document.getElementById('addAgent').onclick=()=>{startTurns.push({inbound:false,text:'',gap_min:8});renderStartChat();};
+document.getElementById('addCust').onclick =()=>{startTurns.push({inbound:true, text:'',gap_min:5});renderStartChat();};
+document.getElementById('startHour').oninput=scoreStartDebounced;
+document.getElementById('srcManual').onclick=()=>{
+  setSrc(false); startTurns=[{inbound:true,text:'',gap_min:0}]; renderStartChat(); scoreStart();
+};
+document.getElementById('srcDataset').onclick=async()=>{
+  setSrc(true); startTurns=[{inbound:true,text:await fetchRoot(),gap_min:0}]; renderStartChat(); scoreStart();
+};
+document.getElementById('shuffleRoot').onclick=async()=>{
+  if(startTurns[0]) startTurns[0].text=await fetchRoot(); renderStartChat(); scoreStart();
+};
+function setSrc(dataset){
+  document.getElementById('srcDataset').classList.toggle('on',dataset);
+  document.getElementById('srcManual').classList.toggle('on',!dataset);
+}
+document.getElementById('evalMiddle').onclick=evalMiddle;
+document.getElementById('revealBtn').onclick=doReveal;
+document.getElementById('newMiddle').onclick=loadMiddle;
+
+/* start on the select screen; seed mode 1 with a dataset opener for first view */
+(async function init(){
+  startTurns=[{inbound:true,text:await fetchRoot(),gap_min:0}];
+  renderStartChat();
+})();
+</script>
+</body>
+</html>

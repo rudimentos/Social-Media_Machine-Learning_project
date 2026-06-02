@@ -1,0 +1,23 @@
+[
+  "out_neg_mean",
+  "out_neg_median",
+  "inb_intent_any",
+  "inb_frustration_any",
+  "inb_neg_emoji_any",
+  "inb_negation_ratio",
+  "inb_caps_mean",
+  "inb_money_any",
+  "out_deflection_any",
+  "out_bureaucratic_any",
+  "out_abbrev_mean",
+  "out_neu_mean",
+  "out_formality_mean",
+  "out_formal_vocab_any",
+  "out_passive_ratio",
+  "out_contraction_mean",
+  "out_we_ratio",
+  "agent_sim",
+  "response_lag_mean",
+  "response_lag_max",
+  "root_hour"
+]

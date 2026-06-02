@@ -1,0 +1,11 @@
+flask>=3.0
+pandas>=2.0
+numpy>=1.24
+scikit-learn>=1.3
+xgboost>=2.0
+shap>=0.44
+spacy>=3.7
+transformers>=4.40
+torch>=2.1
+joblib>=1.3
+# after install:  python -m spacy download en_core_web_sm

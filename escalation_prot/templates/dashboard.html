@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escalation Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+<style>
+  :root{
+    --canvas:#f4f1ea; --ink:#1c1a17; --muted:#6c655b; --line:#d8d2c6;
+    --card:#fbf9f4; --card-2:#ffffff;
+    --rust:#9a3b2e; --rust-soft:#c97b6a; --teal:#3c5a63; --teal-soft:#6f95a0; --amber:#b8862f;
+    --side:#181613; --side-line:#2e2a25; --side-ink:#cfc7ba; --side-mut:#8a8175;
+    --shadow:0 1px 0 rgba(28,26,23,.05), 0 10px 34px rgba(28,26,23,.07);
+    --serif:'Fraunces',Georgia,serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--serif);display:flex;min-height:100%;-webkit-font-smoothing:antialiased}
+
+  .side{width:248px;flex:0 0 248px;background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;padding:26px 20px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:34px;animation:fade .6s ease both}
+  .mark{width:34px;height:34px;border-radius:9px;flex:0 0 34px;position:relative;background:radial-gradient(circle at 30% 30%,var(--rust-soft),var(--rust));box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+  .mark::after{content:"";position:absolute;inset:9px;border-radius:50%;border:2px solid rgba(244,241,234,.85);border-right-color:transparent;transform:rotate(20deg)}
+  .brand h1{font-size:16px;font-weight:600;letter-spacing:-.01em;margin:0;color:#f4f1ea;line-height:1.2}
+  .brand small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--side-mut);margin-top:3px}
+  .nav-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--side-mut);margin:6px 8px 10px}
+  .nav{display:flex;flex-direction:column;gap:3px}
+  .nav a{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--side-ink);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:9px;transition:background .18s,color .18s;animation:slidein .5s ease both}
+  .nav a .ic{width:16px;opacity:.7}
+  .nav a:hover{background:rgba(255,255,255,.05)}
+  .nav a.active{background:var(--rust);color:#fff}.nav a.active .ic{opacity:1}
+  .side-foot{margin-top:auto;font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--side-mut);border-top:1px solid var(--side-line);padding-top:16px}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:auto}
+  .topbar{position:sticky;top:0;z-index:5;background:rgba(244,241,234,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:22px 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+  .topbar h2{font-family:var(--serif);font-weight:800;font-size:27px;margin:0;letter-spacing:-.015em}
+  .topbar p{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:5px 0 0;text-transform:uppercase;letter-spacing:.07em}
+  .srcflag{font-family:var(--mono);font-size:10px;letter-spacing:.06em;border:1px dashed var(--amber);color:var(--amber);border-radius:7px;padding:6px 10px;display:none}
+  .srcflag.show{display:inline-block}
+  .content{padding:30px 40px 90px;max-width:1240px;width:100%}
+  @media(max-width:920px){
+    body{flex-direction:column}
+    .side{width:auto;flex:none;height:auto;position:static;flex-direction:row;align-items:center;padding:14px 18px;gap:20px}
+    .brand{margin:0}.side-foot,.nav-h{display:none}.nav{flex-direction:row;margin-left:auto}
+    .main{height:auto}.topbar{padding:18px 22px}.content{padding:22px}
+  }
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
+  @media(max-width:780px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow);animation:rise .5s ease both}
+  .kpi:nth-child(2){animation-delay:.05s}.kpi:nth-child(3){animation-delay:.1s}.kpi:nth-child(4){animation-delay:.15s}
+  .kpi .l{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .kpi .v{font-family:var(--mono);font-size:30px;font-weight:600;margin-top:6px;letter-spacing:-.02em}
+  .kpi .s{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+  .kpi.accent .v{color:var(--rust)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px;box-shadow:var(--shadow);margin-bottom:22px}
+  .card.full{grid-column:1 / -1}
+  .card h3{font-family:var(--serif);font-size:19px;font-weight:600;margin:0 0 3px}
+  .card .cap{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0 0 16px;line-height:1.5}
+  .plot{width:100%}
+  .selrow{display:flex;gap:8px;align-items:center;margin-bottom:12px;font-family:var(--mono);font-size:12px;color:var(--muted);flex-wrap:wrap}
+  select,input[type=range]{font-family:var(--mono)}
+  select{border:1px solid var(--line);border-radius:7px;padding:6px 9px;background:var(--card-2);color:var(--ink);font-size:12px}
+
+  .cm-wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:center}
+  @media(max-width:640px){.cm-wrap{grid-template-columns:1fr}}
+  .thr{margin:4px 0 14px}
+  .thr label{font-family:var(--mono);font-size:11px;color:var(--muted);display:block;margin-bottom:6px}
+  .thr input{width:100%}
+  .thrval{color:var(--rust)}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .metric{background:var(--card-2);border:1px solid var(--line);border-radius:9px;padding:11px 12px}
+  .metric .ml{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .metric .mv{font-family:var(--mono);font-size:22px;margin-top:3px}
+  .note{font-size:12px;color:var(--muted);font-style:italic;line-height:1.55;margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .placeholder{font-family:var(--mono);font-size:12.5px;color:var(--muted);font-style:italic;padding:30px;text-align:center;border:1px dashed var(--line);border-radius:10px}
+
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes slidein{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+  <aside class="side">
+    <div class="brand">
+      <div class="mark"></div>
+      <div><h1>Escalation Lab</h1><small>Support Analytics</small></div>
+    </div>
+    <div class="nav-h">Workspace</div>
+    <nav class="nav">
+      <a href="/dashboard" class="active"><span class="ic">▦</span> Dashboard</a>
+      <a href="/predictor"><span class="ic">◆</span> Predictor</a>
+    </nav>
+    <div class="side-foot">Escalation detection framework<br>Linguistic &amp; conversation-level<br>analysis · prototype</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div><h2>Dashboard</h2><p>Escalation drivers &amp; model performance · 19,828 threads</p></div>
+      <span class="srcflag" id="srcflag">demo data — run export_dashboard.py for full results</span>
+    </div>
+    <div class="content">
+
+      <div class="kpis" id="kpis"></div>
+
+      <div class="card full">
+        <h3>Agent-behaviour drivers</h3>
+        <p class="cap">Escalation rate among threads where each linguistic flag is present vs absent.
+          Bars marked * are significant after Bonferroni correction (α = 0.0025). Associations, not causes.</p>
+        <div class="plot" id="binChart" style="height:360px"></div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Effect sizes (continuous)</h3>
+          <p class="cap">|rank-biserial correlation| with the escalation label. Rust = significant, grey = not.</p>
+          <div class="plot" id="effChart" style="height:340px"></div>
+        </div>
+        <div class="card">
+          <h3>Distribution by class</h3>
+          <p class="cap">Spread of a feature across escalated vs resolved threads.</p>
+          <div class="selrow">feature
+            <select id="distSel"></select>
+          </div>
+          <div class="plot" id="distChart" style="height:280px"></div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>ROC curve</h3>
+          <p class="cap">Test-set ranking performance. Computed from the saved predictions.</p>
+          <div class="plot" id="rocChart" style="height:330px"></div>
+        </div>
+        <div class="card">
+          <h3>Threshold &amp; confusion</h3>
+          <p class="cap">Move the threshold to see the precision/recall trade-off recompute live.</p>
+          <div class="thr">
+            <label>decision threshold: <span class="thrval" id="thrLbl">0.50</span></label>
+            <input type="range" id="thr" min="0.05" max="0.95" step="0.01" value="0.5">
+          </div>
+          <div class="cm-wrap">
+            <div class="plot" id="cmChart" style="height:230px"></div>
+            <div class="metrics" id="metrics"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card full">
+        <h3>SHAP global importance</h3>
+        <p class="cap">Mean absolute SHAP value per feature — the model's overall reliance on each.</p>
+        <div id="shapWrap"><div class="plot" id="shapChart" style="height:380px"></div></div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+const RUST='#9a3b2e', RUSTS='#c97b6a', TEAL='#3c5a63', TEALS='#6f95a0', AMBER='#b8862f',
+      INK='#1c1a17', MUT='#6c655b', LINE='#d8d2c6', CARD='#fbf9f4';
+const FONT={family:'IBM Plex Mono, monospace', size:11, color:INK};
+const BASE={paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)', font:FONT,
+  margin:{l:60,r:18,t:10,b:50}, xaxis:{gridcolor:'#ece6da',zerolinecolor:LINE},
+  yaxis:{gridcolor:'#ece6da',zerolinecolor:LINE}, hoverlabel:{font:{family:'IBM Plex Mono'}}};
+const CFG={displayModeBar:false, responsive:true};
+function L(o){return Object.assign({}, BASE, o);}
+
+let DATA=null;
+
+function showError(msg){
+  document.querySelector('.content').insertAdjacentHTML('afterbegin',
+    `<div style="background:#f7e3df;border:1px solid #c97b6a;color:#9a3b2e;padding:14px 16px;
+     border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:13px;margin-bottom:20px">
+     ${msg}</div>`);
+}
+
+async function load(){
+  if(typeof Plotly==='undefined'){
+    showError('Charts library (Plotly) failed to load. If you are offline or the CDN is '+
+      'blocked, the page cannot draw charts. Check your network / the script tag.');
+    return;
+  }
+  try{
+    const r=await fetch('/api/dashboard'); if(!r.ok) throw new Error('status '+r.status);
+    DATA=await r.json();
+  }catch(e){ DATA=fallback(); }
+  if(DATA.source==='bundled') document.getElementById('srcflag').classList.add('show');
+  render();
+}
+
+function render(){
+  const steps=[renderKpis,renderBinary,renderEffects,
+    ()=>{renderDistSelect();renderDist();},renderRoc,wireThreshold,renderShap];
+  steps.forEach(fn=>{ try{ fn(); }catch(e){ console.error('render step failed:',e); } });
+}
+
+/* ---- KPIs ---- */
+function renderKpis(){
+  const k=DATA.kpis;
+  const cm=confusionAt(0.5);
+  const prec=cm.tp/(cm.tp+cm.fp||1), rec=cm.tp/(cm.tp+cm.fn||1);
+  const cards=[
+    {l:'Threads analysed', v:k.threads.toLocaleString(), s:'after cleaning + language filter'},
+    {l:'Escalation rate', v:(k.esc_rate*100).toFixed(1)+'%', s:k.escalated.toLocaleString()+' escalated', accent:true},
+    {l:'Model ROC-AUC', v:k.auc.toFixed(3), s:'ranking performance'},
+    {l:'Recall @0.50', v:(rec*100).toFixed(1)+'%', s:'precision '+(prec*100).toFixed(1)+'%'},
+  ];
+  document.getElementById('kpis').innerHTML=cards.map(c=>`
+    <div class="kpi ${c.accent?'accent':''}"><div class="l">${c.l}</div>
+      <div class="v">${c.v}</div><div class="s">${c.s}</div></div>`).join('');
+}
+
+/* ---- binary drivers grouped bar ---- */
+function renderBinary(){
+  const d=[...DATA.binary_drivers].sort((a,b)=>b.cramers_v-a.cramers_v);
+  const labels=d.map(x=>x.label+(x.significant?' *':''));
+  Plotly.newPlot('binChart',[
+    {type:'bar', name:'Escalated', x:labels, y:d.map(x=>x.esc_rate*100), marker:{color:RUST}},
+    {type:'bar', name:'Resolved',  x:labels, y:d.map(x=>x.non_rate*100), marker:{color:TEALS}},
+  ], L({barmode:'group', legend:{orientation:'h',y:1.12,x:0,font:{size:11}},
+    yaxis:{title:'escalation rate (%)',gridcolor:'#ece6da'},
+    xaxis:{tickangle:-18,automargin:true}, margin:{l:55,r:14,t:30,b:90}}), CFG);
+}
+
+/* ---- effect sizes ---- */
+function renderEffects(){
+  const d=[...DATA.continuous_drivers].sort((a,b)=>Math.abs(a.rank_biserial)-Math.abs(b.rank_biserial));
+  Plotly.newPlot('effChart',[{
+    type:'bar', orientation:'h',
+    x:d.map(x=>Math.abs(x.rank_biserial)), y:d.map(x=>x.label),
+    marker:{color:d.map(x=>x.significant?RUST:'#bcb3a3')},
+    hovertemplate:'%{y}<br>|rb| = %{x:.3f}<extra></extra>',
+  }], L({xaxis:{title:'|rank-biserial|',gridcolor:'#ece6da'},
+    yaxis:{automargin:true}, margin:{l:160,r:14,t:8,b:45}}), CFG);
+}
+
+/* ---- distributions ---- */
+function renderDistSelect(){
+  const sel=document.getElementById('distSel');
+  sel.innerHTML=DATA.distributions.map((d,i)=>`<option value="${i}">${d.label}</option>`).join('');
+  sel.onchange=renderDist;
+}
+function renderDist(){
+  const d=DATA.distributions[+document.getElementById('distSel').value];
+  function box(stats,name,color){return {type:'box',name,orientation:'h',
+    q1:[stats.q1],median:[stats.median],q3:[stats.q3],lowerfence:[stats.lo],upperfence:[stats.hi],
+    mean:[stats.mean], marker:{color}, line:{color}, y:[name]};}
+  Plotly.newPlot('distChart',[
+    box(d.esc,'Escalated',RUST), box(d.non,'Resolved',TEAL),
+  ], L({showlegend:false, xaxis:{title:d.label,gridcolor:'#ece6da'},
+    yaxis:{automargin:true}, margin:{l:80,r:14,t:8,b:45}}), CFG);
+}
+
+/* ---- ROC (computed from eval arrays) ---- */
+function rocPoints(){
+  const yt=DATA.eval.y_true, yp=DATA.eval.y_proba;
+  const P=yt.reduce((a,b)=>a+b,0), N=yt.length-P;
+  const pts=[];
+  for(let t=0;t<=100;t++){
+    const thr=t/100; let tp=0,fp=0;
+    for(let i=0;i<yt.length;i++){ if(yp[i]>=thr){ if(yt[i])tp++; else fp++; } }
+    pts.push([fp/N, tp/P]);
+  }
+  return pts;
+}
+function renderRoc(){
+  const pts=rocPoints();
+  Plotly.newPlot('rocChart',[
+    {x:pts.map(p=>p[0]), y:pts.map(p=>p[1]), mode:'lines', line:{color:RUST,width:2.5}, name:'ROC',
+     hovertemplate:'FPR %{x:.2f}<br>TPR %{y:.2f}<extra></extra>'},
+    {x:[0,1], y:[0,1], mode:'lines', line:{color:MUT,dash:'dot',width:1}, name:'chance', hoverinfo:'skip'},
+  ], L({showlegend:false, xaxis:{title:'False positive rate',range:[0,1],gridcolor:'#ece6da'},
+    yaxis:{title:'True positive rate',range:[0,1],gridcolor:'#ece6da'},
+    annotations:[{x:.62,y:.18,text:'AUC = '+DATA.eval.auc.toFixed(3),showarrow:false,
+      font:{family:'IBM Plex Mono',size:13,color:RUST}}], margin:{l:55,r:14,t:8,b:45}}), CFG);
+}
+
+/* ---- threshold + confusion ---- */
+function confusionAt(thr){
+  const yt=DATA.eval.y_true, yp=DATA.eval.y_proba;
+  let tp=0,fp=0,tn=0,fn=0;
+  for(let i=0;i<yt.length;i++){
+    const pred=yp[i]>=thr?1:0;
+    if(pred&&yt[i])tp++; else if(pred&&!yt[i])fp++; else if(!pred&&!yt[i])tn++; else fn++;
+  }
+  return {tp,fp,tn,fn};
+}
+function renderConfusion(thr){
+  const c=confusionAt(thr);
+  const z=[[c.tn,c.fp],[c.fn,c.tp]];
+  Plotly.newPlot('cmChart',[{
+    type:'heatmap', z:z, x:['pred resolved','pred escalated'], y:['true resolved','true escalated'],
+    colorscale:[[0,'#f4efe6'],[1,RUST]], showscale:false,
+    text:z, texttemplate:'%{text}', textfont:{family:'IBM Plex Mono',size:16,color:INK},
+    hovertemplate:'%{y} / %{x}<br>%{z}<extra></extra>',
+  }], L({xaxis:{side:'bottom'}, yaxis:{automargin:true}, margin:{l:95,r:6,t:6,b:40}}), CFG);
+  const prec=c.tp/(c.tp+c.fp||1), rec=c.tp/(c.tp+c.fn||1);
+  const f1=2*prec*rec/((prec+rec)||1), acc=(c.tp+c.tn)/(c.tp+c.tn+c.fp+c.fn);
+  const m=[['Precision',prec],['Recall',rec],['F1',f1],['Accuracy',acc]];
+  document.getElementById('metrics').innerHTML=m.map(([l,v])=>
+    `<div class="metric"><div class="ml">${l}</div><div class="mv">${(v*100).toFixed(1)}%</div></div>`).join('');
+}
+function wireThreshold(){
+  const s=document.getElementById('thr'), lbl=document.getElementById('thrLbl');
+  s.oninput=()=>{ lbl.textContent=(+s.value).toFixed(2); renderConfusion(+s.value); };
+  renderConfusion(0.5);
+}
+
+/* ---- SHAP ---- */
+function renderShap(){
+  if(!DATA.shap){
+    document.getElementById('shapWrap').innerHTML=
+      '<div class="placeholder">SHAP values not yet computed — run step 13 and re-export. '+
+      'This panel fills in automatically once shap_rank is available.</div>';
+    return;
+  }
+  const d=[...DATA.shap].sort((a,b)=>a.mean_abs_shap-b.mean_abs_shap);
+  Plotly.newPlot('shapChart',[{type:'bar',orientation:'h',
+    x:d.map(x=>x.mean_abs_shap), y:d.map(x=>x.feature), marker:{color:TEAL},
+    hovertemplate:'%{y}<br>%{x:.4f}<extra></extra>'}],
+    L({xaxis:{title:'mean |SHAP|',gridcolor:'#ece6da'},yaxis:{automargin:true},margin:{l:170,r:14,t:8,b:45}}), CFG);
+}
+
+/* ---- preview fallback (no backend) ---- */
+function fallback(){
+  function j_beta(a,b){ // crude beta via sum-of-uniforms shaping
+    let x=0;for(let i=0;i<a;i++)x+=Math.random(); let y=0;for(let i=0;i<b;i++)y+=Math.random();
+    return x/(x+y); }
+  const non=Array.from({length:600},()=>j_beta(2,6)), esc=Array.from({length:110},()=>j_beta(6,3));
+  return {source:'bundled',
+    kpis:{threads:19828,escalated:2893,esc_rate:0.146,auc:0.8918},
+    binary_drivers:[
+      {label:'Deflection language (agent)',esc_rate:.315,non_rate:.172,cramers_v:.127,significant:true},
+      {label:'Bureaucratic language (agent)',esc_rate:.207,non_rate:.103,cramers_v:.114,significant:true},
+      {label:'Frustration terms (customer)',esc_rate:.112,non_rate:.044,cramers_v:.106,significant:true},
+      {label:'Intent terms (customer)',esc_rate:.118,non_rate:.050,cramers_v:.102,significant:true},
+      {label:'Formal vocabulary (agent)',esc_rate:.047,non_rate:.019,cramers_v:.064,significant:true},
+      {label:'Negative emoji (customer)',esc_rate:.052,non_rate:.041,cramers_v:.018,significant:false}],
+    continuous_drivers:[
+      {label:'Agent template similarity',rank_biserial:-.675,significant:true},
+      {label:'Max response lag (min)',rank_biserial:-.250,significant:true},
+      {label:'Negation ratio (customer)',rank_biserial:-.206,significant:true},
+      {label:'Caps ratio (customer)',rank_biserial:-.107,significant:true},
+      {label:'Passive voice ratio (agent)',rank_biserial:-.103,significant:true},
+      {label:'Mean response lag (min)',rank_biserial:-.076,significant:true},
+      {label:'We-not-I ratio (agent)',rank_biserial:.033,significant:false},
+      {label:'Formality F-score (agent)',rank_biserial:-.013,significant:false}],
+    distributions:[
+      {label:'Agent template similarity',esc:{q1:0,median:.141,q3:.42,mean:.22,lo:0,hi:.78},non:{q1:0,median:0,q3:0,mean:.05,lo:0,hi:.31}},
+      {label:'Max response lag (min)',esc:{q1:38,median:118,q3:360,mean:290,lo:0,hi:900},non:{q1:12,median:41.8,q3:140,mean:120,lo:0,hi:520}},
+      {label:'Negation ratio (customer)',esc:{q1:0,median:.333,q3:.6,mean:.34,lo:0,hi:1},non:{q1:0,median:0,q3:.33,mean:.17,lo:0,hi:1}}],
+    eval:{y_true:[...Array(600).fill(0),...Array(110).fill(1)], y_proba:[...non,...esc], auc:0.8918},
+    shap:null};
+}
+
+load();
+</script>
+</body>
+</html>
