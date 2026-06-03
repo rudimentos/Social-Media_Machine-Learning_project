@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Escalation Lab{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+{% block head_extra %}{% endblock %}
+<style>
+  :root{
+    --canvas:#f4f1ea; --ink:#1c1a17; --muted:#6c655b; --line:#d8d2c6;
+    --card:#fbf9f4; --card-2:#ffffff;
+    --rust:#9a3b2e; --rust-soft:#c97b6a; --teal:#3c5a63; --teal-soft:#6f95a0; --amber:#b8862f;
+    --side:#181613; --side-line:#2e2a25; --side-ink:#cfc7ba; --side-mut:#8a8175;
+    --shadow:0 1px 0 rgba(28,26,23,.05), 0 10px 34px rgba(28,26,23,.07);
+    --serif:'Fraunces',Georgia,serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--serif);display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+  .side{width:248px;flex:0 0 248px;background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;padding:26px 20px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:34px;animation:fade .6s ease both;text-decoration:none}
+  .mark{width:34px;height:34px;border-radius:9px;flex:0 0 34px;position:relative;background:radial-gradient(circle at 30% 30%,var(--rust-soft),var(--rust));box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+  .mark::after{content:"";position:absolute;inset:9px;border-radius:50%;border:2px solid rgba(244,241,234,.85);border-right-color:transparent;transform:rotate(20deg)}
+  .brand h1{font-size:16px;font-weight:600;letter-spacing:-.01em;margin:0;color:#f4f1ea;line-height:1.2}
+  .brand small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--side-mut);margin-top:3px}
+  .nav-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--side-mut);margin:6px 8px 10px}
+  .nav{display:flex;flex-direction:column;gap:3px}
+  .nav a{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--side-ink);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:9px;transition:background .18s,color .18s;animation:slidein .5s ease both}
+  .nav a .ic{width:16px;display:inline-block;text-align:center;opacity:.7}
+  .nav a:hover{background:rgba(255,255,255,.05)}
+  .nav a.active{background:var(--rust);color:#fff}.nav a.active .ic{opacity:1}
+  details.drop{border-radius:9px}
+  details.drop>summary{display:flex;align-items:center;gap:11px;list-style:none;cursor:pointer;color:var(--side-ink);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:9px}
+  details.drop>summary::-webkit-details-marker{display:none}
+  details.drop>summary:hover{background:rgba(255,255,255,.05)}
+  details.drop>summary .chev{margin-left:auto;font-size:10px;opacity:.6;transition:transform .2s}
+  details.drop[open]>summary .chev{transform:rotate(90deg)}
+  details.drop .sub{display:flex;flex-direction:column;gap:2px;margin:2px 0 4px 14px;padding-left:10px;border-left:1px solid var(--side-line)}
+  details.drop .sub a{font-size:12px;padding:8px 10px}
+  .side-foot{margin-top:auto;font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--side-mut);border-top:1px solid var(--side-line);padding-top:16px}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:100vh}
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(244,241,234,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:22px 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+  .topbar h2{font-family:var(--serif);font-weight:800;font-size:27px;margin:0;letter-spacing:-.015em}
+  .topbar .subt{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:5px 0 0;text-transform:uppercase;letter-spacing:.07em}
+  .content{padding:30px 40px 40px;max-width:1240px;width:100%;flex:1}
+  .disclaimer{font-family:var(--mono);font-size:10.5px;line-height:1.7;color:var(--muted);border-top:1px solid var(--line);padding:18px 40px 34px;max-width:1240px}
+  .disclaimer b{color:#4a443d;font-weight:600}
+
+  @media(max-width:920px){
+    body{flex-direction:column}
+    .side{width:auto;flex:none;height:auto;position:static;flex-direction:row;align-items:center;padding:14px 18px;gap:16px;flex-wrap:wrap}
+    .brand{margin:0}.side-foot,.nav-h{display:none}.nav{flex-direction:row;margin-left:auto;flex-wrap:wrap}
+    details.drop .sub{margin-left:0;border:0;padding-left:0;flex-direction:row}
+    .main{min-height:0}.topbar{padding:18px 22px}.content{padding:22px}.disclaimer{padding:18px 22px}
+  }
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes slidein{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+  {% block style_extra %}{% endblock %}
+</style>
+</head>
+<body>
+  <aside class="side">
+    <a class="brand" href="/">
+      <div class="mark"></div>
+      <div><h1>Escalation Lab</h1><small>Support Analytics</small></div>
+    </a>
+    <div class="nav-h">Workspace</div>
+    <nav class="nav">
+      <a href="/" class="{% if active=='home' %}active{% endif %}"><span class="ic">⌂</span> Home</a>
+      <a href="/dashboard" class="{% if active=='dashboard' %}active{% endif %}"><span class="ic">▦</span> Dashboard</a>
+      <details class="drop" {% if active=='predictor' %}open{% endif %}>
+        <summary><span class="ic">◆</span> Predictor <span class="chev">▸</span></summary>
+        <div class="sub">
+          <a href="/predictor/start" class="{% if submode=='start' %}active{% endif %}">From the start</a>
+          <a href="/predictor/middle" class="{% if submode=='middle' %}active{% endif %}">Jump into the middle</a>
+        </div>
+      </details>
+    </nav>
+    <div class="side-foot">Escalation detection framework<br>Linguistic &amp; conversation-level<br>analysis · prototype</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2>{% block page_title %}{% endblock %}</h2>
+        <div class="subt">{% block page_sub %}{% endblock %}</div>
+      </div>
+      {% block topbar_right %}{% endblock %}
+    </div>
+    <div class="content">
+      {% block content %}{% endblock %}
+    </div>
+    <div class="disclaimer">
+      {% block disclaimer %}
+      <b>Disclaimer.</b> This prototype is derived from a single public dataset (Customer Support on Twitter)
+      and a proxy label for "ineffective resolution," not verified escalation outcomes. All readings describe
+      statistical <b>association, not causation</b>, and inherit the limitations of the sentiment model
+      (sarcasm and empathy are misread) and the proxy definition. The framework was built from observed agent
+      behaviour in that dataset and does not capture phenomena absent from it (e.g. agent profanity). Treat every
+      figure as indicative for research and training purposes only — not as a decision system.
+      {% endblock %}
+    </div>
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

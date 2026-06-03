@@ -1,54 +1,15 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Escalation Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
-<style>
-  :root{
-    --canvas:#f4f1ea; --ink:#1c1a17; --muted:#6c655b; --line:#d8d2c6;
-    --card:#fbf9f4; --card-2:#ffffff;
-    --rust:#9a3b2e; --rust-soft:#c97b6a; --teal:#3c5a63; --teal-soft:#6f95a0; --amber:#b8862f;
-    --side:#181613; --side-line:#2e2a25; --side-ink:#cfc7ba; --side-mut:#8a8175;
-    --shadow:0 1px 0 rgba(28,26,23,.05), 0 10px 34px rgba(28,26,23,.07);
-    --serif:'Fraunces',Georgia,serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;height:100%}
-  body{background:var(--canvas);color:var(--ink);font-family:var(--serif);display:flex;min-height:100%;-webkit-font-smoothing:antialiased}
+{% extends "base.html" %}
+{% set active = 'dashboard' %}
+{% block title %}Dashboard · Escalation Lab{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_sub %}Escalation drivers &amp; model performance · 19,828 threads{% endblock %}
+{% block topbar_right %}<span class="srcflag" id="srcflag">demo data — run export_dashboard.py for full results</span>{% endblock %}
 
-  .side{width:248px;flex:0 0 248px;background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;padding:26px 20px;position:sticky;top:0;height:100vh}
-  .brand{display:flex;align-items:center;gap:11px;margin-bottom:34px;animation:fade .6s ease both}
-  .mark{width:34px;height:34px;border-radius:9px;flex:0 0 34px;position:relative;background:radial-gradient(circle at 30% 30%,var(--rust-soft),var(--rust));box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
-  .mark::after{content:"";position:absolute;inset:9px;border-radius:50%;border:2px solid rgba(244,241,234,.85);border-right-color:transparent;transform:rotate(20deg)}
-  .brand h1{font-size:16px;font-weight:600;letter-spacing:-.01em;margin:0;color:#f4f1ea;line-height:1.2}
-  .brand small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--side-mut);margin-top:3px}
-  .nav-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--side-mut);margin:6px 8px 10px}
-  .nav{display:flex;flex-direction:column;gap:3px}
-  .nav a{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--side-ink);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:9px;transition:background .18s,color .18s;animation:slidein .5s ease both}
-  .nav a .ic{width:16px;opacity:.7}
-  .nav a:hover{background:rgba(255,255,255,.05)}
-  .nav a.active{background:var(--rust);color:#fff}.nav a.active .ic{opacity:1}
-  .side-foot{margin-top:auto;font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--side-mut);border-top:1px solid var(--side-line);padding-top:16px}
+{% block head_extra %}<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>{% endblock %}
 
-  .main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:auto}
-  .topbar{position:sticky;top:0;z-index:5;background:rgba(244,241,234,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:22px 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
-  .topbar h2{font-family:var(--serif);font-weight:800;font-size:27px;margin:0;letter-spacing:-.015em}
-  .topbar p{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:5px 0 0;text-transform:uppercase;letter-spacing:.07em}
+{% block style_extra %}
   .srcflag{font-family:var(--mono);font-size:10px;letter-spacing:.06em;border:1px dashed var(--amber);color:var(--amber);border-radius:7px;padding:6px 10px;display:none}
   .srcflag.show{display:inline-block}
-  .content{padding:30px 40px 90px;max-width:1240px;width:100%}
-  @media(max-width:920px){
-    body{flex-direction:column}
-    .side{width:auto;flex:none;height:auto;position:static;flex-direction:row;align-items:center;padding:14px 18px;gap:20px}
-    .brand{margin:0}.side-foot,.nav-h{display:none}.nav{flex-direction:row;margin-left:auto}
-    .main{height:auto}.topbar{padding:18px 22px}.content{padding:22px}
-  }
-
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
   @media(max-width:780px){.kpis{grid-template-columns:repeat(2,1fr)}}
   .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow);animation:rise .5s ease both}
@@ -57,7 +18,6 @@
   .kpi .v{font-family:var(--mono);font-size:30px;font-weight:600;margin-top:6px;letter-spacing:-.02em}
   .kpi .s{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
   .kpi.accent .v{color:var(--rust)}
-
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px;box-shadow:var(--shadow);margin-bottom:22px}
@@ -66,9 +26,7 @@
   .card .cap{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0 0 16px;line-height:1.5}
   .plot{width:100%}
   .selrow{display:flex;gap:8px;align-items:center;margin-bottom:12px;font-family:var(--mono);font-size:12px;color:var(--muted);flex-wrap:wrap}
-  select,input[type=range]{font-family:var(--mono)}
-  select{border:1px solid var(--line);border-radius:7px;padding:6px 9px;background:var(--card-2);color:var(--ink);font-size:12px}
-
+  select{border:1px solid var(--line);border-radius:7px;padding:6px 9px;background:var(--card-2);color:var(--ink);font-size:12px;font-family:var(--mono)}
   .cm-wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:center}
   @media(max-width:640px){.cm-wrap{grid-template-columns:1fr}}
   .thr{margin:4px 0 14px}
@@ -79,89 +37,61 @@
   .metric{background:var(--card-2);border:1px solid var(--line);border-radius:9px;padding:11px 12px}
   .metric .ml{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
   .metric .mv{font-family:var(--mono);font-size:22px;margin-top:3px}
-  .note{font-size:12px;color:var(--muted);font-style:italic;line-height:1.55;margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
   .placeholder{font-family:var(--mono);font-size:12.5px;color:var(--muted);font-style:italic;padding:30px;text-align:center;border:1px dashed var(--line);border-radius:10px}
+{% endblock %}
 
-  @keyframes fade{from{opacity:0}to{opacity:1}}
-  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-  @keyframes slidein{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
-</style>
-</head>
-<body>
-  <aside class="side">
-    <div class="brand">
-      <div class="mark"></div>
-      <div><h1>Escalation Lab</h1><small>Support Analytics</small></div>
+{% block content %}
+  <div class="kpis" id="kpis"></div>
+
+  <div class="card full">
+    <h3>Agent-behaviour drivers</h3>
+    <p class="cap">Escalation rate among threads where each linguistic flag is present vs absent.
+      Bars marked * are significant after Bonferroni correction (α = 0.0025). Associations, not causes.</p>
+    <div class="plot" id="binChart" style="height:360px"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Effect sizes (continuous)</h3>
+      <p class="cap">|rank-biserial correlation| with the escalation label. Rust = significant, grey = not.</p>
+      <div class="plot" id="effChart" style="height:340px"></div>
     </div>
-    <div class="nav-h">Workspace</div>
-    <nav class="nav">
-      <a href="/dashboard" class="active"><span class="ic">▦</span> Dashboard</a>
-      <a href="/predictor"><span class="ic">◆</span> Predictor</a>
-    </nav>
-    <div class="side-foot">Escalation detection framework<br>Linguistic &amp; conversation-level<br>analysis · prototype</div>
-  </aside>
-
-  <div class="main">
-    <div class="topbar">
-      <div><h2>Dashboard</h2><p>Escalation drivers &amp; model performance · 19,828 threads</p></div>
-      <span class="srcflag" id="srcflag">demo data — run export_dashboard.py for full results</span>
-    </div>
-    <div class="content">
-
-      <div class="kpis" id="kpis"></div>
-
-      <div class="card full">
-        <h3>Agent-behaviour drivers</h3>
-        <p class="cap">Escalation rate among threads where each linguistic flag is present vs absent.
-          Bars marked * are significant after Bonferroni correction (α = 0.0025). Associations, not causes.</p>
-        <div class="plot" id="binChart" style="height:360px"></div>
-      </div>
-
-      <div class="grid">
-        <div class="card">
-          <h3>Effect sizes (continuous)</h3>
-          <p class="cap">|rank-biserial correlation| with the escalation label. Rust = significant, grey = not.</p>
-          <div class="plot" id="effChart" style="height:340px"></div>
-        </div>
-        <div class="card">
-          <h3>Distribution by class</h3>
-          <p class="cap">Spread of a feature across escalated vs resolved threads.</p>
-          <div class="selrow">feature
-            <select id="distSel"></select>
-          </div>
-          <div class="plot" id="distChart" style="height:280px"></div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="card">
-          <h3>ROC curve</h3>
-          <p class="cap">Test-set ranking performance. Computed from the saved predictions.</p>
-          <div class="plot" id="rocChart" style="height:330px"></div>
-        </div>
-        <div class="card">
-          <h3>Threshold &amp; confusion</h3>
-          <p class="cap">Move the threshold to see the precision/recall trade-off recompute live.</p>
-          <div class="thr">
-            <label>decision threshold: <span class="thrval" id="thrLbl">0.50</span></label>
-            <input type="range" id="thr" min="0.05" max="0.95" step="0.01" value="0.5">
-          </div>
-          <div class="cm-wrap">
-            <div class="plot" id="cmChart" style="height:230px"></div>
-            <div class="metrics" id="metrics"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card full">
-        <h3>SHAP global importance</h3>
-        <p class="cap">Mean absolute SHAP value per feature — the model's overall reliance on each.</p>
-        <div id="shapWrap"><div class="plot" id="shapChart" style="height:380px"></div></div>
-      </div>
-
+    <div class="card">
+      <h3>Distribution by class</h3>
+      <p class="cap">Spread of a feature across escalated vs resolved threads.</p>
+      <div class="selrow">feature <select id="distSel"></select></div>
+      <div class="plot" id="distChart" style="height:280px"></div>
     </div>
   </div>
 
+  <div class="grid">
+    <div class="card">
+      <h3>ROC curve</h3>
+      <p class="cap">Test-set ranking performance. Computed from the saved predictions.</p>
+      <div class="plot" id="rocChart" style="height:330px"></div>
+    </div>
+    <div class="card">
+      <h3>Threshold &amp; confusion</h3>
+      <p class="cap">Move the threshold to see the precision/recall trade-off recompute live.</p>
+      <div class="thr">
+        <label>decision threshold: <span class="thrval" id="thrLbl">0.50</span></label>
+        <input type="range" id="thr" min="0.05" max="0.95" step="0.01" value="0.5">
+      </div>
+      <div class="cm-wrap">
+        <div class="plot" id="cmChart" style="height:230px"></div>
+        <div class="metrics" id="metrics"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card full">
+    <h3>SHAP global importance</h3>
+    <p class="cap">Mean absolute SHAP value per feature — the model's overall reliance on each.</p>
+    <div id="shapWrap"><div class="plot" id="shapChart" style="height:380px"></div></div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
 <script>
 const RUST='#9a3b2e', RUSTS='#c97b6a', TEAL='#3c5a63', TEALS='#6f95a0', AMBER='#b8862f',
       INK='#1c1a17', MUT='#6c655b', LINE='#d8d2c6', CARD='#fbf9f4';
@@ -364,5 +294,4 @@ function fallback(){
 
 load();
 </script>
-</body>
-</html>
+{% endblock %}

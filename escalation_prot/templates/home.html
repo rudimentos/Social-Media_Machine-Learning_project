@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% set active = 'home' %}
+{% block title %}Escalation Lab{% endblock %}
+{% block page_title %}Escalation Lab{% endblock %}
+{% block page_sub %}Linguistic &amp; conversation-level analysis of customer support{% endblock %}
+
+{% block style_extra %}
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;align-items:center;margin-bottom:38px}
+  @media(max-width:860px){.hero{grid-template-columns:1fr}}
+  .hero h3{font-family:var(--serif);font-size:32px;font-weight:800;letter-spacing:-.02em;margin:0 0 14px;line-height:1.15}
+  .hero p{font-size:16px;line-height:1.65;color:#3a352f;margin:0 0 12px;max-width:48ch}
+  .hero .meta{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin-top:18px;line-height:1.8}
+  .illus{width:100%;height:auto;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow)}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:680px){.cards{grid-template-columns:1fr}}
+  .navcard{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:var(--shadow);transition:transform .18s,border-color .18s;animation:rise .5s ease both}
+  .navcard:nth-child(2){animation-delay:.07s}
+  .navcard:hover{transform:translateY(-4px);border-color:var(--rust-soft)}
+  .navcard .k{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--rust)}
+  .navcard h4{font-family:var(--serif);font-size:22px;font-weight:600;margin:10px 0 8px}
+  .navcard p{font-size:14.5px;line-height:1.55;color:var(--muted);margin:0}
+  .navcard .go{font-family:var(--mono);font-size:12px;margin-top:16px;display:inline-flex;gap:7px;color:var(--ink)}
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <div>
+    <h3>Where support conversations go wrong — and the language that signals it.</h3>
+    <p>This prototype accompanies an escalation-detection framework built on 19,828 customer-support
+      threads. It surfaces the linguistic and conversation-level features statistically associated with
+      threads that fail to resolve, and lets you probe them interactively.</p>
+    <p>Explore the aggregate findings in the dashboard, or step through a conversation in the predictor to
+      see how the model reads it turn by turn.</p>
+    <div class="meta">XGBoost + SHAP · spaCy · Cardiff RoBERTa sentiment<br>ROC-AUC 0.892 · proxy label for ineffective resolution</div>
+  </div>
+  <svg class="illus" viewBox="0 0 460 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustrative analytics dashboard">
+    <rect x="0" y="0" width="460" height="300" rx="16" fill="#fbf9f4"/>
+    <rect x="22" y="22" width="120" height="40" rx="8" fill="#f1ece1"/>
+    <rect x="34" y="33" width="60" height="6" rx="3" fill="#c9c0b0"/>
+    <rect x="34" y="45" width="38" height="9" rx="4" fill="#9a3b2e"/>
+    <rect x="154" y="22" width="120" height="40" rx="8" fill="#f1ece1"/>
+    <rect x="166" y="33" width="60" height="6" rx="3" fill="#c9c0b0"/>
+    <rect x="166" y="45" width="46" height="9" rx="4" fill="#3c5a63"/>
+    <rect x="286" y="22" width="152" height="40" rx="8" fill="#f1ece1"/>
+    <rect x="298" y="33" width="60" height="6" rx="3" fill="#c9c0b0"/>
+    <rect x="298" y="45" width="30" height="9" rx="4" fill="#b8862f"/>
+    <!-- bar chart -->
+    <rect x="22" y="82" width="250" height="196" rx="10" fill="#f6f2e9"/>
+    <g>
+      <rect x="46" y="210" width="26" height="52" rx="3" fill="#c97b6a"/>
+      <rect x="46" y="170" width="26" height="40" rx="3" fill="#9a3b2e"/>
+      <rect x="92" y="200" width="26" height="62" rx="3" fill="#c97b6a"/>
+      <rect x="92" y="150" width="26" height="50" rx="3" fill="#9a3b2e"/>
+      <rect x="138" y="222" width="26" height="40" rx="3" fill="#c97b6a"/>
+      <rect x="138" y="196" width="26" height="26" rx="3" fill="#9a3b2e"/>
+      <rect x="184" y="232" width="26" height="30" rx="3" fill="#6f95a0"/>
+      <rect x="184" y="216" width="26" height="16" rx="3" fill="#3c5a63"/>
+    </g>
+    <line x1="40" y1="262" x2="256" y2="262" stroke="#d8d2c6" stroke-width="1.5"/>
+    <!-- roc curve -->
+    <rect x="286" y="82" width="152" height="196" rx="10" fill="#f6f2e9"/>
+    <line x1="304" y1="260" x2="420" y2="100" stroke="#d8d2c6" stroke-width="1" stroke-dasharray="4 4"/>
+    <path d="M304 260 C 320 150, 360 110, 420 100" fill="none" stroke="#9a3b2e" stroke-width="2.5"/>
+    <circle cx="420" cy="100" r="3.5" fill="#9a3b2e"/>
+  </svg>
+</div>
+
+<div class="cards">
+  <a class="navcard" href="/dashboard">
+    <div class="k">Findings</div>
+    <h4>Dashboard</h4>
+    <p>Explore the escalation drivers, effect sizes, class distributions, and model performance — with a
+      live threshold to see the precision/recall trade-off.</p>
+    <span class="go">Open dashboard →</span>
+  </a>
+  <a class="navcard" href="/predictor/start">
+    <div class="k">Interactive</div>
+    <h4>Predictor</h4>
+    <p>Step through a support conversation — from the opening message or dropped into the middle of a real
+      thread — and see the model's reading and per-feature contributions.</p>
+    <span class="go">Open predictor →</span>
+  </a>
+</div>
+{% endblock %}
