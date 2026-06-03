@@ -294,13 +294,15 @@ function confusionAt(thr){
 }
 function renderConfusion(thr){
   const c=confusionAt(thr);
+  // Plotly draws the FIRST y-category at the BOTTOM, so rows are listed bottom-up:
+  // bottom = "true resolved" (tn, fp); top = "true escalated" (fn, tp).
   const z=[[c.tn,c.fp],[c.fn,c.tp]];
   Plotly.newPlot('cmChart',[{
     type:'heatmap', z:z, x:['pred resolved','pred escalated'], y:['true resolved','true escalated'],
-    colorscale:[[0,'#f4efe6'],[1,RUST]], showscale:false,
+    colorscale:[[0,'#f4efe6'],[1,RUST]], showscale:false, xgap:3, ygap:3,
     text:z, texttemplate:'%{text}', textfont:{family:'IBM Plex Mono',size:16,color:INK},
-    hovertemplate:'%{y} / %{x}<br>%{z}<extra></extra>',
-  }], L({xaxis:{side:'bottom'}, yaxis:{automargin:true}, margin:{l:95,r:6,t:6,b:40}}), CFG);
+    hovertemplate:'%{y} / %{x}<br>count %{z}<extra></extra>',
+  }], L({xaxis:{side:'top'}, yaxis:{automargin:true}, margin:{l:100,r:6,t:24,b:14}}), CFG);
   const prec=c.tp/(c.tp+c.fp||1), rec=c.tp/(c.tp+c.fn||1);
   const f1=2*prec*rec/((prec+rec)||1), acc=(c.tp+c.tn)/(c.tp+c.tn+c.fp+c.fn);
   const m=[['Precision',prec],['Recall',rec],['F1',f1],['Accuracy',acc]];
