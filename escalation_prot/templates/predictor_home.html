@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% set active = 'predictor' %}
+{% block title %}Predictor · Escalation Lab{% endblock %}
+{% block page_title %}Predictor{% endblock %}
+{% block page_sub %}Step through a support conversation and read the model{% endblock %}
+{% block topbar_right %}<div class="hbtns"><a class="hbtn" href="/">⌂ Home</a></div>{% endblock %}
+
+{% block style_extra %}
+  .body{max-width:720px;margin-bottom:32px}
+  .body p{font-size:16px;line-height:1.65;color:#3a352f;margin:0 0 14px}
+  .body h3{font-family:var(--serif);font-size:15px;font-weight:600;margin:22px 0 6px}
+  .body .small{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.6}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:760px}
+  @media(max-width:680px){.cards{grid-template-columns:1fr}}
+  .navcard{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:var(--shadow);transition:transform .18s,border-color .18s;animation:rise .5s ease both}
+  .navcard:nth-child(2){animation-delay:.07s}
+  .navcard:hover{transform:translateY(-4px);border-color:var(--rust-soft)}
+  .navcard .k{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--rust)}
+  .navcard h4{font-family:var(--serif);font-size:21px;font-weight:600;margin:10px 0 8px}
+  .navcard p{font-size:14px;line-height:1.55;color:var(--muted);margin:0}
+  .navcard .go{font-family:var(--mono);font-size:12px;margin-top:16px;display:inline-flex;gap:7px;color:var(--ink)}
+{% endblock %}
+
+{% block content %}
+<div class="body">
+  <p>The predictor turns the escalation framework into something you can poke at. You compose or
+    step through a support conversation, and for each message it reports the <b>linguistic and
+    semantic features</b> the analysis is built on — sentiment, deflection and bureaucratic language,
+    passive voice, negation, intent and frustration terms, and so on.</p>
+  <p>Once a conversation has at least two turns, it also reads the whole thread through the trained
+    XGBoost model and shows the <b>probability of an ineffective resolution</b>, broken down by each
+    feature's SHAP contribution — how much, and in which direction, it pushed that prediction.</p>
+  <h3>Two ways to use it</h3>
+  <p class="small">FROM THE START — open with a real dataset message or write your own, then build the
+    thread turn by turn.<br>
+    JUMP INTO THE MIDDLE — a real thread is drawn at random; you see the first three turns, write the
+    agent's reply, and then reveal what actually happened to compare against.</p>
+  <h3>Read with caution</h3>
+  <p class="small">Everything here describes association in one dataset, not causation, and the model
+    was trained on completed threads — short or in-progress conversations are extrapolation and are
+    flagged as such. See the full disclaimer below.</p>
+</div>
+
+<div class="cards">
+  <a class="navcard" href="/predictor/start">
+    <div class="k">Mode 01</div>
+    <h4>From the start</h4>
+    <p>Build a thread from the opening message — yours or the dataset's — and watch the reading update
+      as each turn is submitted.</p>
+    <span class="go">Begin →</span>
+  </a>
+  <a class="navcard" href="/predictor/middle">
+    <div class="k">Mode 02</div>
+    <h4>Jump into the middle</h4>
+    <p>Reply to a real three-turn thread, then reveal the actual reply and outcome to compare against
+      your own.</p>
+    <span class="go">Begin →</span>
+  </a>
+</div>
+{% endblock %}

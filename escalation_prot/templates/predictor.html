@@ -3,135 +3,157 @@
 {% block title %}Predictor · Escalation Lab{% endblock %}
 {% block page_title %}Predictor{% endblock %}
 {% block page_sub %}{% if submode=='middle' %}Jump into the middle · reply to a real thread{% else %}From the start · build a thread turn by turn{% endif %}{% endblock %}
+{% block topbar_right %}<div class="hbtns"><a class="hbtn" href="/">⌂ Home</a><a class="hbtn" href="/predictor">◆ Predictor home</a></div>{% endblock %}
 
 {% block style_extra %}
-  .demo-flag{font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:.06em;border:1px dashed var(--amber);border-radius:7px;padding:6px 10px;display:none;margin-bottom:16px}
+  .demo-flag{font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:.06em;border:1px dashed var(--amber);border-radius:7px;padding:6px 10px;display:none;margin:0 0 16px}
   .demo-flag.show{display:inline-block}
-  .work{display:grid;grid-template-columns:1.02fr .98fr;gap:24px;align-items:start}
+  .work{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start}
   @media(max-width:980px){.work{grid-template-columns:1fr}}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px;box-shadow:var(--shadow);margin-bottom:20px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:var(--shadow)}
   .panel>h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 14px;font-weight:600;display:flex;align-items:center;gap:9px}
   .panel>h4 .dot{width:7px;height:7px;border-radius:50%;background:var(--rust)}
-  .panel>h4 .right{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)}
+  .panel>h4 .right{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px}
+  .bars{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  @media(max-width:560px){.bars{grid-template-columns:1fr}}
 
-  .srcrow{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
   .pill{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:var(--card-2);color:var(--muted);padding:7px 13px;border-radius:999px;cursor:pointer}
   .pill.on{background:var(--teal);color:#fff;border-color:var(--teal)}
   .mini{font-family:var(--mono);font-size:11.5px;border:1px solid var(--ink);background:transparent;color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer}
   .mini:hover{background:var(--ink);color:var(--canvas)}
   .mini.solid{background:var(--ink);color:var(--canvas)}.mini.solid:hover{background:var(--rust);border-color:var(--rust)}
+  .srcrow{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+  .addrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
   .chat{display:flex;flex-direction:column;gap:11px;margin-bottom:14px}
-  .bubble{max-width:90%;border-radius:13px;padding:11px 14px;font-size:14.5px;line-height:1.5;position:relative;cursor:pointer;border:1px solid transparent;transition:box-shadow .15s,border-color .15s}
-  .bubble .who{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;opacity:.75;display:flex;align-items:center;gap:8px}
+  .bubble{max-width:92%;border-radius:13px;padding:11px 14px;font-size:14.5px;line-height:1.5;position:relative;border:1px solid transparent;transition:box-shadow .15s}
+  .bubble .who{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;opacity:.8;display:flex;align-items:center;gap:8px}
   .bubble.cust{align-self:flex-start;background:#eef2f2;border-color:#d7e0e0;border-bottom-left-radius:4px}
   .bubble.cust .who{color:var(--teal)}
   .bubble.agent{align-self:flex-end;background:#f6e9e5;border-color:#ecd2ca;border-bottom-right-radius:4px}
   .bubble.agent .who{color:var(--rust)}
+  .bubble.obj{cursor:pointer}
+  .bubble.obj:hover{box-shadow:0 0 0 1px var(--rust-soft)}
   .bubble.sel{box-shadow:0 0 0 2px var(--ink)}
-  .bubble.edit{cursor:text;width:100%;max-width:100%;background:var(--card-2);border-style:dashed;border-color:var(--line)}
-  .bubble textarea{width:100%;border:0;background:transparent;resize:vertical;min-height:46px;font-family:var(--serif);font-size:14.5px;color:var(--ink);outline:none}
-  .bubble .rm{position:absolute;top:8px;right:10px;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}.bubble .rm:hover{color:var(--rust)}
-  .bubble .analyse{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 6px;background:transparent;cursor:pointer}
-  .bubble.sel .analyse{background:var(--ink);color:var(--canvas);border-color:var(--ink)}
-
-  .addrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .gapin{width:46px;font-family:var(--mono);border:1px solid var(--line);border-radius:6px;padding:3px 6px;background:var(--card-2);color:var(--ink);font-size:11px}
+  .bubble.edit{width:100%;max-width:100%;background:var(--card-2);border-style:dashed;border-color:var(--line)}
+  .bubble textarea{width:100%;border:0;background:transparent;resize:vertical;min-height:50px;font-family:var(--serif);font-size:14.5px;color:var(--ink);outline:none;margin-bottom:8px}
+  .bubble .ctl{margin-left:auto;display:flex;gap:6px}
+  .bubble .ib{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px}
+  .bubble .ib:hover{color:var(--rust)}
+  .gapin{width:44px;font-family:var(--mono);border:1px solid var(--line);border-radius:6px;padding:2px 5px;background:var(--card-2);color:var(--ink);font-size:11px}
+  .boxbtns{display:flex;gap:7px;justify-content:flex-end}
+  .boxbtns .mini{padding:5px 11px}
   .hourwrap{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:12px}
-  .hourwrap input{width:56px;font-family:var(--mono);border:1px solid var(--line);border-radius:6px;padding:5px 7px;background:var(--card-2);color:var(--ink)}
+  .hourwrap input{width:54px;font-family:var(--mono);border:1px solid var(--line);border-radius:6px;padding:5px 7px;background:var(--card-2);color:var(--ink)}
 
-  .warn{font-family:var(--mono);font-size:11.5px;line-height:1.5;color:#8a5a12;background:#fbf3e3;border:1px solid #e9d4a6;border-radius:8px;padding:10px 12px;margin-bottom:14px}
-  .empty{font-size:13.5px;color:var(--muted);font-style:italic;line-height:1.6}
+  .warn{font-family:var(--mono);font-size:11px;line-height:1.5;color:#8a5a12;background:#fbf3e3;border:1px solid #e9d4a6;border-radius:8px;padding:9px 11px;margin-bottom:12px}
+  .empty{font-size:13px;color:var(--muted);font-style:italic;line-height:1.6}
+  .quote{font-size:13.5px;line-height:1.5;color:#3a352f;border-left:3px solid var(--line);padding:4px 0 4px 11px;margin:0 0 14px;font-style:italic}
 
-  .feat{display:grid;grid-template-columns:1fr auto;gap:3px 14px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line)}
-  .feat:last-child{border-bottom:0}
-  .feat .fl{font-weight:600;font-size:14px}
-  .feat .fv{font-family:var(--mono);font-size:13px;color:var(--ink);text-align:right}
-  .feat .fe{grid-column:1 / -1;font-size:12.5px;color:var(--muted);line-height:1.45}
-  .feat .fv.on{color:var(--rust)} .feat .fv.off{color:var(--muted)}
-  .sentbars{display:flex;gap:8px;margin:4px 0 14px}
-  .sentbars .sbx{flex:1;background:var(--card-2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;text-align:center}
-  .sentbars .sbx .l{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-  .sentbars .sbx .v{font-family:var(--mono);font-size:18px;margin-top:3px}
-  .sentbars .sbx.neg .v{color:var(--rust)}.sentbars .sbx.pos .v{color:var(--teal)}
   .grp{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}
+  .sentbars{display:flex;gap:7px;margin:4px 0 12px}
+  .sentbars .sbx{flex:1;background:var(--card-2);border:1px solid var(--line);border-radius:8px;padding:8px 6px;text-align:center}
+  .sentbars .sbx .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .sentbars .sbx .v{font-family:var(--mono);font-size:16px;margin-top:3px}
+  .sentbars .sbx.neg .v{color:var(--rust)}.sentbars .sbx.pos .v{color:var(--teal)}
+  .feat{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line)}
+  .feat:last-child{border-bottom:0}
+  .feat .fl{font-weight:600;font-size:13.5px}
+  .feat .fv{font-family:var(--mono);font-size:12px;text-align:right}
+  .feat .fv.on{color:var(--rust)} .feat .fv.off{color:var(--muted)}
+  .feat .fe{grid-column:1 / -1;font-size:12px;color:var(--muted);line-height:1.4}
 
-  .prob{display:flex;align-items:flex-end;gap:13px;margin-bottom:3px}
-  .prob .big{font-family:var(--mono);font-size:44px;font-weight:600;letter-spacing:-.02em;line-height:1}
-  .prob .chip{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;padding:4px 11px;border-radius:999px;margin-bottom:6px}
+  .prob{display:flex;align-items:flex-end;gap:11px;margin-bottom:3px}
+  .prob .big{font-family:var(--mono);font-size:38px;font-weight:600;letter-spacing:-.02em;line-height:1}
+  .prob .chip{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:4px 9px;border-radius:999px;margin-bottom:5px}
   .prob .chip.hi{background:var(--rust);color:#fff}.prob .chip.lo{background:var(--teal);color:#fff}
-  .psub{font-family:var(--mono);font-size:11px;color:var(--muted)}
-  .meter{height:11px;border-radius:999px;margin:13px 0 6px;overflow:hidden;background:linear-gradient(90deg,#e7efef,#f3e0da);border:1px solid var(--line);position:relative}
+  .psub{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  .meter{height:10px;border-radius:999px;margin:11px 0 6px;overflow:hidden;background:linear-gradient(90deg,#e7efef,#f3e0da);border:1px solid var(--line);position:relative}
   .meter>i{position:absolute;top:0;bottom:0;left:0;background:linear-gradient(90deg,var(--teal),var(--rust));transition:width .5s cubic-bezier(.2,.8,.2,1)}
-  .shap-h{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
-  .srow{border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:8px;background:var(--card-2);animation:rise .35s ease both}
-  .srow .st{display:flex;align-items:center;gap:9px;margin-bottom:4px}
-  .srow .snm{font-weight:600;font-size:13.5px}
-  .srow .sval{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto}
-  .srow .scontrib{font-family:var(--mono);font-size:12px;padding:2px 7px;border-radius:5px}
+  .shap-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 9px}
+  .srow{border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin-bottom:7px;background:var(--card-2);animation:rise .3s ease both}
+  .srow .st{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .srow .snm{font-weight:600;font-size:13px}
+  .srow .sval{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto}
+  .srow .scontrib{font-family:var(--mono);font-size:11px;padding:2px 6px;border-radius:5px}
   .srow .scontrib.pos{background:#f6e9e5;color:var(--rust)} .srow .scontrib.neg{background:#eef2f2;color:var(--teal)}
-  .srow .track{position:relative;height:7px;background:#ece6da;border-radius:999px;margin:6px 0 5px}
+  .srow .track{position:relative;height:6px;background:#ece6da;border-radius:999px;margin:6px 0 5px}
   .srow .track .mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line)}
-  .srow .track .fill{position:absolute;top:0;height:7px;border-radius:999px}
+  .srow .track .fill{position:absolute;top:0;height:6px;border-radius:999px}
   .srow .track .fill.pos{left:50%;background:var(--rust-soft)} .srow .track .fill.neg{right:50%;background:var(--teal-soft)}
-  .srow .sx{font-size:12px;color:var(--muted);line-height:1.45}
-  .legend{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:8px;display:flex;gap:16px}
-  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .srow .sx{font-size:11.5px;color:var(--muted);line-height:1.4}
+  .legend{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .outcome{display:inline-flex;align-items:center;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:5px 11px;border-radius:999px;margin-bottom:12px}
+  .outcome.hi{background:var(--rust);color:#fff}.outcome.lo{background:var(--teal);color:#fff}
+  .matchnote{font-size:11.5px;color:var(--muted);font-style:italic;line-height:1.5;margin-bottom:12px}
 {% endblock %}
 
 {% block content %}
+<div class="modesel">
+  <a href="/predictor/start" class="{% if submode=='start' %}on{% endif %}">From the start</a>
+  <a href="/predictor/middle" class="{% if submode=='middle' %}on{% endif %}">Jump into the middle</a>
+</div>
+
 <div class="demo-flag" id="demoFlag">demo data — live version reads the dataset &amp; backend model</div>
 
 <div class="work">
-  <div>
-    <div class="panel">
-      {% if submode=='middle' %}
-        <h4><span class="dot"></span> The thread so far
-          <button class="mini right" id="newThread">⟳ new thread</button></h4>
-        <div class="chat" id="chat"></div>
-        <div class="bubble agent edit" style="max-width:100%;cursor:text">
-          <div class="who">Your turn — agent reply (turn 4)</div>
-          <textarea id="reply" placeholder="Write how you'd respond…"></textarea>
-        </div>
-        <div class="addrow" style="margin-top:12px">
-          <button class="mini solid" id="evalBtn">Evaluate my reply →</button>
+  <!-- LEFT: conversation -->
+  <div class="panel">
+    {% if submode=='middle' %}
+      <h4><span class="dot"></span> The thread so far
+        <button class="mini right" id="newThread" style="margin-left:auto">⟳ new thread</button></h4>
+      <div class="chat" id="chat"></div>
+      <div class="bubble agent edit" style="max-width:100%">
+        <div class="who">Your turn — agent reply (turn 4) · gap
+          <input class="gapin" id="replyGap" type="number" min="0" value="8"> min</div>
+        <textarea id="reply" placeholder="Write how you'd respond…"></textarea>
+        <div class="boxbtns">
+          <button class="mini solid" id="submitReply">Submit reply</button>
           <button class="mini" id="revealBtn">Reveal what really happened</button>
         </div>
-      {% else %}
-        <h4><span class="dot"></span> Conversation</h4>
-        <div class="srcrow">
-          <span class="pill on" id="srcDataset">Dataset opener</span>
-          <span class="pill" id="srcManual">Write your own</span>
-          <button class="mini" id="shuffleRoot" style="margin-left:auto">⟳ shuffle opener</button>
-        </div>
-        <div class="chat" id="chat"></div>
-        <div class="addrow">
-          <button class="mini" id="addAgent">+ Agent reply</button>
-          <button class="mini" id="addCust">+ Customer message</button>
-        </div>
-        <div class="hourwrap">start hour
-          <input type="number" id="startHour" min="0" max="23" value="12">
-          <span>(for response-lag &amp; out-of-hours features)</span>
-        </div>
-        <div class="addrow" style="margin-top:14px">
-          <button class="mini solid" id="evalBtn">Evaluate thread →</button>
-        </div>
-      {% endif %}
-    </div>
+      </div>
+    {% else %}
+      <h4><span class="dot"></span> Conversation</h4>
+      <div class="srcrow">
+        <span class="pill on" id="srcDataset">Dataset opener</span>
+        <span class="pill" id="srcManual">Write your own</span>
+        <button class="mini" id="resetBtn" style="margin-left:auto">⟳ reset</button>
+      </div>
+      <div class="chat" id="chat"></div>
+      <div class="addrow">
+        <button class="mini" id="addAgent">+ Agent reply</button>
+        <button class="mini" id="addCust">+ Customer message</button>
+      </div>
+      <div class="hourwrap">start hour
+        <input type="number" id="startHour" min="0" max="23" value="12">
+        <span>(response-lag &amp; out-of-hours)</span>
+      </div>
+    {% endif %}
   </div>
 
-  <div>
+  <!-- RIGHT: bars -->
+  <div class="bars">
     <div class="panel">
-      <h4><span class="dot"></span> Tweet-level evaluation <span class="right" id="tweetWho"></span></h4>
-      <div id="tweetPanel"><p class="empty">Click any message on the left to see its linguistic and
-        semantic features.</p></div>
+      <h4><span class="dot"></span> Tweet-level <span class="right" id="tweetWho"></span></h4>
+      <div id="tweetPanel"><p class="empty">Click a message to see its features.</p></div>
     </div>
+    {% if submode=='middle' %}
+    <div class="panel rev" id="realTweetWrap" style="display:none">
+      <h4><span class="dot"></span> Actual reply — tweet-level</h4>
+      <div id="realTweet"></div>
+    </div>
+    {% endif %}
     <div class="panel">
-      <h4><span class="dot"></span> Thread-level evaluation</h4>
-      <div id="threadPanel"><p class="empty">{% if submode=='middle' %}Write a reply and click
-        evaluate.{% else %}Build the thread and click evaluate.{% endif %}</p></div>
+      <h4><span class="dot"></span> Thread-level</h4>
+      <div id="threadPanel"><p class="empty">{% if submode=='middle' %}Submit a reply to read the thread.{% else %}Submit a second turn to read the thread.{% endif %}</p></div>
     </div>
-    <div id="revealZone"></div>
+    {% if submode=='middle' %}
+    <div class="panel rev" id="realThreadWrap" style="display:none">
+      <h4><span class="dot"></span> Actual thread — thread-level</h4>
+      <div id="realThread"></div>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
@@ -139,12 +161,10 @@
 {% block scripts %}
 <script>
 const MODE = "{{ submode }}";
-
 const DEMO_ROOTS = [
   "I've been charged twice for my subscription this month. Can you sort this out?",
   "My delivery still hasn't arrived and it's been two weeks now.",
-  "The app keeps logging me out every few minutes."
-];
+  "The app keeps logging me out every few minutes."];
 const DEMO_MIDDLE = {
   prompt_turns:[
     {inbound:true, text:"I've been charged twice for my subscription and I want a refund."},
@@ -153,8 +173,7 @@ const DEMO_MIDDLE = {
   real_continuation:[
     {inbound:false,text:"Unfortunately refunds are handled by our billing department. Kindly contact them via the form."},
     {inbound:true, text:"Unbelievable. I'm cancelling."}],
-  escalated:1
-};
+  escalated:1};
 
 let turns = [];
 let middle = null;
@@ -162,7 +181,6 @@ let selected = -1;
 
 function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 function flagDemo(){document.getElementById('demoFlag').classList.add('show');}
-
 async function api(path, body){
   try{
     const opt = body ? {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)} : {};
@@ -171,202 +189,255 @@ async function api(path, body){
   }catch(e){ flagDemo(); return null; }
 }
 
-function renderChat(){
-  const box = document.getElementById('chat'); box.innerHTML='';
-  const list = MODE==='middle' ? middle.prompt_turns.map(t=>({inbound:t.inbound,text:t.text})) : turns;
-  list.forEach((t,i)=>{
+// start mode
+function canEdit(t){ return !(t.opener && t.source==='dataset'); }
+function canDelete(t){ return !t.opener; }
+
+function renderStart(){
+  const box=document.getElementById('chat'); box.innerHTML='';
+  turns.forEach((t,i)=>{
     const div=document.createElement('div');
-    const editable = MODE!=='middle';
-    div.className=`bubble ${t.inbound?'cust':'agent'}${editable?' edit':''}${selected===i?' sel':''}`;
-    if(editable){
-      div.innerHTML=`<button class="rm" title="remove">×</button>
-        <div class="who">${t.inbound?'Customer':'Agent'} · gap
-          <input class="gapin" type="number" min="0" value="${t.gap_min}"> min
-          <button class="analyse">analyse ▸</button></div>
-        <textarea>${esc(t.text)}</textarea>`;
-      div.querySelector('.rm').onclick=(e)=>{e.stopPropagation();turns.splice(i,1);if(selected===i)selected=-1;renderChat();};
-      div.querySelector('textarea').oninput=e=>{t.text=e.target.value;};
-      div.querySelector('textarea').onkeydown=e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();selectTweet(i);}};
-      div.querySelector('.gapin').oninput=e=>{t.gap_min=parseFloat(e.target.value)||0;};
-      div.querySelector('.analyse').onclick=(e)=>{e.stopPropagation();selectTweet(i);};
+    if(t.status==='editing'){
+      div.className=`bubble ${t.inbound?'cust':'agent'} edit`;
+      const gap = t.opener ? '' : `· gap <input class="gapin" type="number" min="0" value="${t.gap_min}"> min`;
+      div.innerHTML=`<div class="who">${t.inbound?'Customer':'Agent'} ${gap}</div>
+        <textarea placeholder="${t.inbound?'Customer message…':'Agent reply…'}">${esc(t.draft)}</textarea>
+        <div class="boxbtns">
+          <button class="mini solid bSubmit">Submit</button>
+          ${(t.isNew || canDelete(t)) ? '<button class="mini bCancel">Cancel</button>' : ''}
+        </div>`;
+      div.querySelector('textarea').oninput=e=>t.draft=e.target.value;
+      const g=div.querySelector('.gapin'); if(g) g.oninput=e=>t.gap_min=parseFloat(e.target.value)||0;
+      div.querySelector('.bSubmit').onclick=()=>submitTurn(i);
+      const c=div.querySelector('.bCancel'); if(c) c.onclick=()=>cancelTurn(i);
     }else{
-      div.innerHTML=`<div class="who">${t.inbound?'Customer':'Agent'}
-        <button class="analyse">analyse ▸</button></div>${esc(t.text)}`;
-      div.querySelector('.analyse').onclick=(e)=>{e.stopPropagation();selectTweet(i);};
-      div.onclick=()=>selectTweet(i);
+      div.className=`bubble ${t.inbound?'cust':'agent'} obj${selected===i?' sel':''}`;
+      const ctl=`<span class="ctl">
+        ${canEdit(t)?'<button class="ib bEdit" title="edit">✎</button>':''}
+        ${canDelete(t)?'<button class="ib bDel" title="delete">×</button>':''}</span>`;
+      const gaptxt = t.opener ? '' : `· ${t.gap_min} min`;
+      div.innerHTML=`<div class="who">${t.inbound?'Customer':'Agent'} ${gaptxt} ${ctl}</div>${esc(t.text)}`;
+      div.onclick=()=>selectStart(i);
+      const e=div.querySelector('.bEdit'); if(e) e.onclick=(ev)=>{ev.stopPropagation();editTurn(i);};
+      const d=div.querySelector('.bDel'); if(d) d.onclick=(ev)=>{ev.stopPropagation();delTurn(i);};
     }
     box.appendChild(div);
   });
 }
-
-function currentList(){
-  return MODE==='middle' ? middle.prompt_turns.map(t=>({inbound:t.inbound,text:t.text,gap_min:0})) : turns;
+function submitTurn(i){
+  const t=turns[i]; const txt=(t.draft||'').trim();
+  if(!txt){ return; }
+  t.text=txt; t.status='object'; t.isNew=false;
+  renderStart(); selectStart(i); autoThread();
+}
+function cancelTurn(i){
+  const t=turns[i];
+  if(t.isNew) turns.splice(i,1); else t.status='object';
+  if(selected===i) selected=-1;
+  renderStart();
+}
+function editTurn(i){ turns[i].draft=turns[i].text; turns[i].status='editing'; renderStart(); }
+function delTurn(i){
+  turns.splice(i,1);
+  if(selected===i){ selected=-1; clearTweet(); }
+  else if(selected>i) selected--;
+  renderStart(); autoThread();
+}
+function selectStart(i){
+  if(turns[i].status!=='object') return;
+  selected=i; renderStart();
+  showTweet(turns[i].inbound, turns[i].text, (turns[i].inbound?'customer':'agent')+' · turn '+(i+1));
+}
+function objectsStart(){ return turns.filter(t=>t.status==='object' && (t.text||'').trim()); }
+async function autoThread(){
+  const objs=objectsStart();
+  if(objs.length<2){
+    document.getElementById('threadPanel').innerHTML='<p class="empty">Submit a second turn to read the thread.</p>';
+    return;
+  }
+  const list=objs.map(t=>({inbound:t.inbound,text:t.text,gap_min:t.gap_min}));
+  await runThread(list,'threadPanel');
 }
 
-async function selectTweet(i){
-  selected=i; renderChat();
-  const t=currentList()[i];
-  document.getElementById('tweetWho').textContent=(t.inbound?'customer':'agent')+' · turn '+(i+1);
-  const panel=document.getElementById('tweetPanel');
-  if(!(t.text||'').trim()){ panel.innerHTML='<p class="empty">This message has no text yet.</p>'; return; }
-  panel.innerHTML='<p class="empty">Analysing…</p>';
-  const d=await api('/api/tweet',{text:t.text,inbound:t.inbound}) || demoTweet(t);
-  panel.innerHTML=renderTweet(d);
+/* ===================== MIDDLE MODE ===================== */
+function renderMiddle(){
+  const box=document.getElementById('chat'); box.innerHTML='';
+  middle.prompt_turns.forEach((t,i)=>{
+    const div=document.createElement('div');
+    div.className=`bubble ${t.inbound?'cust':'agent'} obj${selected===i?' sel':''}`;
+    div.innerHTML=`<div class="who">${t.inbound?'Customer':'Agent'}</div>${esc(t.text)}`;
+    div.onclick=()=>{ selected=i; renderMiddle();
+      showTweet(t.inbound, t.text, (t.inbound?'customer':'agent')+' · turn '+(i+1)); };
+    box.appendChild(div);
+  });
 }
-function renderTweet(d){
-  const s=d.sentiment;
-  const warn = d.warning ? `<div class="warn">${d.warning}</div>` : '';
-  const sent=`<div class="grp">Semantic — Cardiff RoBERTa sentiment</div>
-    <div class="sentbars">
-      <div class="sbx neg"><div class="l">negative</div><div class="v">${(s.neg*100).toFixed(0)}%</div></div>
-      <div class="sbx"><div class="l">neutral</div><div class="v">${(s.neu*100).toFixed(0)}%</div></div>
-      <div class="sbx pos"><div class="l">positive</div><div class="v">${(s.pos*100).toFixed(0)}%</div></div>
-    </div>`;
-  const rows=d.features.map(f=>{
-    let v = typeof f.value==='boolean' ? (f.value?'yes':'no')
-          : (typeof f.value==='number' ? (Number.isInteger(f.value)?f.value:f.value.toFixed(3)) : f.value);
-    const cls = (f.flag===true)?'on':(f.flag===false?'off':'');
-    return `<div class="feat"><span class="fl">${f.label}</span>
-      <span class="fv ${cls}">${v}</span><span class="fe">${f.explain}</span></div>`;
-  }).join('');
-  return warn+sent+`<div class="grp">Linguistic — spaCy</div>${rows}`;
-}
-
-async function evaluate(extraTurn){
-  let list = currentList().filter(t=>(t.text||'').trim());
-  if(extraTurn) list=[...list, extraTurn];
-  const panel=document.getElementById('threadPanel');
-  if(list.length===0){ panel.innerHTML='<p class="empty">Nothing to evaluate — add a message first.</p>'; return null; }
-  panel.innerHTML='<p class="empty">Scoring…</p>';
-  const sh=document.getElementById('startHour');
-  const startHour = (MODE!=='middle' && sh) ? (parseInt(sh.value)||12) : 12;
-  const d=await api('/api/score',{turns:list,start_hour:startHour}) || demoScore(list);
-  panel.innerHTML=renderThread(d);
-  return d;
-}
-function renderThread(d){
-  if(d.error) return `<p class="empty">${d.error}</p>`;
-  const warn = d.warning ? `<div class="warn">${d.warning}</div>` : '';
-  const gate = d.gate_warning ? `<div class="warn">${d.gate_warning}</div>` : '';
-  if(d.probability==null){ return warn+gate+`<p class="empty">${d.note||'No model probability available.'}</p>`; }
-  const pct=(d.probability*100).toFixed(1);
-  const hi=d.probability>=0.5;
-  const rows=(d.contributions||[]).map(c=>{
-    const pos=c.contribution>=0;
-    const w=Math.min(50, Math.abs(c.share)/2);
-    let v = typeof c.value==='number' ? (Number.isInteger(c.value)?c.value:c.value.toFixed(3)) : c.value;
-    return `<div class="srow">
-      <div class="st"><span class="snm">${c.label}</span>
-        <span class="sval">value ${v}</span>
-        <span class="scontrib ${pos?'pos':'neg'}">${pos?'+':''}${c.contribution.toFixed(3)}</span></div>
-      <div class="track"><span class="mid"></span>
-        <span class="fill ${pos?'pos':'neg'}" style="width:${w}%"></span></div>
-      <div class="sx">${c.explain} <b>(${c.share.toFixed(0)}% of this prediction)</b></div>
-    </div>`;
-  }).join('');
-  return warn+gate+`
-    <div class="prob"><span class="big">${pct}%</span>
-      <span class="chip ${hi?'hi':'lo'}">${hi?'flagged':'not flagged'}</span></div>
-    <div class="psub">model probability of ineffective resolution · default threshold 0.50</div>
-    <div class="meter"><i style="width:${pct}%"></i></div>
-    <div class="shap-h">Per-feature contributions (SHAP, log-odds)</div>
-    ${rows}
-    <div class="legend"><span><i style="background:var(--rust-soft)"></i>pushes toward escalation</span>
-      <span><i style="background:var(--teal-soft)"></i>pushes away</span></div>`;
-}
-
-async function evalReply(){
+async function submitReply(){
   const reply=(document.getElementById('reply').value||'').trim();
-  const panel=document.getElementById('threadPanel');
-  if(!reply){ panel.innerHTML='<p class="empty">Write a reply first.</p>'; return; }
-  await evaluate({inbound:false,text:reply,gap_min:8});
-  selected=-1; renderChat();
-  document.getElementById('tweetWho').textContent='your reply';
-  const td=await api('/api/tweet',{text:reply,inbound:false}) || demoTweet({inbound:false,text:reply});
-  document.getElementById('tweetPanel').innerHTML=renderTweet(td);
+  if(!reply){ document.getElementById('threadPanel').innerHTML='<p class="empty">Write a reply first.</p>'; return; }
+  const gap=parseFloat((document.getElementById('replyGap')||{}).value)||8;
+  selected=-1; renderMiddle();
+  showTweet(false, reply, 'your reply');
+  const list=[...middle.prompt_turns.map(t=>({inbound:t.inbound,text:t.text,gap_min:5})),
+              {inbound:false,text:reply,gap_min:gap}];
+  await runThread(list,'threadPanel');
 }
 async function reveal(){
-  const zone=document.getElementById('revealZone');
   const out=middle.escalated===1;
   const realReply=middle.real_continuation.find(t=>!t.inbound) || middle.real_continuation[0];
-  const fullReal=[...middle.prompt_turns, ...middle.real_continuation].map(t=>({inbound:t.inbound,text:t.text,gap_min:5}));
-  zone.innerHTML=`
-    <div class="panel"><h4><span class="dot"></span> Actual outcome</h4>
-      <div class="prob"><span class="chip ${out?'hi':'lo'}">${out?'this thread escalated':'this thread resolved'}</span></div>
-      <p class="empty" style="margin-top:10px">The real agent's reply and the full real thread are scored below —
-      compare them against your reply.</p></div>
-    <div class="panel"><h4><span class="dot"></span> Actual reply — tweet-level</h4>
-      <div id="realTweet"><p class="empty">Analysing…</p></div></div>
-    <div class="panel"><h4><span class="dot"></span> Actual thread — thread-level</h4>
-      <div id="realThread"><p class="empty">Scoring…</p></div></div>`;
-  const rt=await api('/api/tweet',{text:realReply.text,inbound:false}) || demoTweet(realReply);
-  document.getElementById('realTweet').innerHTML=renderTweet(rt);
-  const rth=await api('/api/score',{turns:fullReal,start_hour:12}) || demoScore(fullReal);
-  document.getElementById('realThread').innerHTML=renderThread(rth);
+  const gap=parseFloat((document.getElementById('replyGap')||{}).value)||8;
+  document.getElementById('realTweetWrap').style.display='';
+  document.getElementById('realThreadWrap').style.display='';
+  // actual reply tweet-level
+  const rt=await api('/api/tweet',{text:realReply.text,inbound:false}) || demoTweet({inbound:false,text:realReply.text});
+  document.getElementById('realTweet').innerHTML=tweetHtml(rt, false, realReply.text, 'actual reply');
+
+
+  const matched=[...middle.prompt_turns.map(t=>({inbound:t.inbound,text:t.text,gap_min:5})),
+                 {inbound:false,text:realReply.text,gap_min:gap}];
+  const d=await api('/api/score',{turns:matched,start_hour:12}) || demoScore(matched);
+  document.getElementById('realThread').innerHTML=
+    `<div class="outcome ${out?'hi':'lo'}">${out?'full thread escalated':'full thread resolved'}</div>`
+    +threadHtml(d);
 }
 
+/* ===================== shared render ===================== */
+function clearTweet(){ document.getElementById('tweetPanel').innerHTML='<p class="empty">Click a message to see its features.</p>'; document.getElementById('tweetWho').textContent=''; }
+async function showTweet(inbound, text, who){
+  document.getElementById('tweetWho').textContent=who||'';
+  const panel=document.getElementById('tweetPanel');
+  panel.innerHTML='<p class="empty">Analysing…</p>';
+  const d=await api('/api/tweet',{text,inbound}) || demoTweet({inbound,text});
+  panel.innerHTML=tweetHtml(d, inbound, text);
+}
+function tweetHtml(d, inbound, text){
+  const s=d.sentiment;
+  const warn=d.warning?`<div class="warn">${d.warning}</div>`:'';
+  const quote=`<div class="quote">${esc(text)}</div>`;
+  const sent=`<div class="grp">Semantic — sentiment</div>
+    <div class="sentbars">
+      <div class="sbx neg"><div class="l">neg</div><div class="v">${(s.neg*100).toFixed(0)}%</div></div>
+      <div class="sbx"><div class="l">neu</div><div class="v">${(s.neu*100).toFixed(0)}%</div></div>
+      <div class="sbx pos"><div class="l">pos</div><div class="v">${(s.pos*100).toFixed(0)}%</div></div>
+    </div>`;
+  const rows=d.features.filter(f=>{
+    // hide features that didn't fire: boolean 'no' or a numeric/zero measurement
+    if(f.value===false) return false;
+    if(typeof f.value==='number' && f.value===0) return false;
+    return true;
+  }).map(f=>{
+    let v = typeof f.value==='boolean'?(f.value?'yes':'no')
+          :(typeof f.value==='number'?(Number.isInteger(f.value)?f.value:f.value.toFixed(3)):f.value);
+    const cls=(f.flag===true)?'on':(f.flag===false?'off':'');
+    return `<div class="feat"><span class="fl">${f.label}</span><span class="fv ${cls}">${v}</span>
+      <span class="fe">${f.explain}</span></div>`;
+  }).join('');
+  const linguistic = rows ? `<div class="grp">Linguistic</div>${rows}` : '';
+  return quote+warn+sent+linguistic;
+}
+async function runThread(list, targetId){
+  const panel=document.getElementById(targetId);
+  panel.innerHTML='<p class="empty">Scoring…</p>';
+  const sh=document.getElementById('startHour');
+  const startHour=(MODE!=='middle'&&sh)?(parseInt(sh.value)||12):12;
+  const d=await api('/api/score',{turns:list,start_hour:startHour}) || demoScore(list);
+  panel.innerHTML=threadHtml(d);
+}
+function threadHtml(d){
+  if(d.error) return `<p class="empty">${d.error}</p>`;
+  const warn=d.warning?`<div class="warn">${d.warning}</div>`:'';
+  const gate=d.gate_warning?`<div class="warn">${d.gate_warning}</div>`:'';
+  if(d.probability==null) return warn+gate+`<p class="empty">${d.note||'No probability available.'}</p>`;
+  const pct=(d.probability*100).toFixed(1), hi=d.probability>=0.5;
+  const rows=(d.contributions||[]).map(c=>{
+    const pos=c.contribution>=0, w=Math.min(50,Math.abs(c.share)/2);
+    let v=typeof c.value==='number'?(Number.isInteger(c.value)?c.value:c.value.toFixed(3)):c.value;
+    return `<div class="srow"><div class="st"><span class="snm">${c.label}</span>
+      <span class="sval">val ${v}</span>
+      <span class="scontrib ${pos?'pos':'neg'}">${pos?'+':''}${c.contribution.toFixed(3)}</span></div>
+      <div class="track"><span class="mid"></span><span class="fill ${pos?'pos':'neg'}" style="width:${w}%"></span></div>
+      <div class="sx">${c.explain} <b>(${c.share.toFixed(0)}%)</b></div></div>`;
+  }).join('');
+  return warn+gate+`
+    <div class="prob"><span class="big">${pct}%</span><span class="chip ${hi?'hi':'lo'}">${hi?'flagged':'not flagged'}</span></div>
+    <div class="psub">model probability · threshold 0.50</div>
+    <div class="meter"><i style="width:${pct}%"></i></div>
+    <div class="shap-h">SHAP contributions (log-odds)</div>${rows}
+    <div class="legend"><span><i style="background:var(--rust-soft)"></i>toward escalation</span>
+      <span><i style="background:var(--teal-soft)"></i>away</span></div>`;
+}
+
+/* ===================== demo fallbacks ===================== */
 function demoTweet(t){
-  const x=t.text.toLowerCase();
-  const has=w=>w.some(k=>x.includes(k));
-  const neg=has(['unacceptable','useless','not good enough','unbelievable','fuck','angry','refund','cancel'])?0.7:0.2;
-  const feats = t.inbound ? [
-    {label:'Caps ratio',value:0.0,flag:false,explain:'Share of all-caps words; shouting proxy.'},
+  const x=(t.text||'').toLowerCase(); const has=w=>w.some(k=>x.includes(k));
+  const neg=has(['unacceptable','useless','not good enough','unbelievable','fuck','refund','cancel'])?0.7:0.2;
+  const feats=t.inbound?[
+    {label:'Caps ratio',value:0.0,flag:false,explain:'Share of all-caps words.'},
     {label:'Negation',value:has(["not","n't","no","never"]),flag:has(["not","n't","no","never"]),explain:'Negation words present.'},
-    {label:'Intent terms',value:has(['cancel','refund','legal','lawyer']),flag:has(['cancel','refund','legal','lawyer']),explain:'Escalation-intent vocabulary (cancel, refund, legal…).'},
-    {label:'Frustration terms',value:has(['unacceptable','useless','ridiculous','unbelievable']),flag:has(['unacceptable','useless','ridiculous','unbelievable']),explain:'Strong negative vocabulary.'},
-  ] : [
-    {label:'Deflection terms',value:has(['unable','cannot','policy','department','contact']),flag:has(['unable','cannot','policy','department','contact']),explain:'Deflection vocabulary (unable, policy, department…).'},
-    {label:'Bureaucratic terms',value:has(['kindly','patience','appreciate','flag']),flag:has(['kindly','patience','appreciate','flag']),explain:'Formulaic reassurance vocabulary.'},
-    {label:'Passive voice',value:has(['will be','has been','was processed']),flag:has(['will be','has been']),explain:'Passive construction present.'},
+    {label:'Intent terms',value:has(['cancel','refund','legal','lawyer']),flag:has(['cancel','refund','legal','lawyer']),explain:'Escalation-intent vocabulary.'},
+    {label:'Frustration terms',value:has(['unacceptable','useless','unbelievable']),flag:has(['unacceptable','useless','unbelievable']),explain:'Strong negative vocabulary.'},
+  ]:[
+    {label:'Deflection terms',value:has(['unable','cannot','policy','department','contact']),flag:has(['unable','cannot','policy','department','contact']),explain:'Deflection vocabulary.'},
+    {label:'Bureaucratic terms',value:has(['kindly','patience','appreciate','flag']),flag:has(['kindly','patience','appreciate','flag']),explain:'Formulaic reassurance.'},
+    {label:'Passive voice',value:has(['will be','has been']),flag:has(['will be','has been']),explain:'Passive construction.'},
     {label:'Contractions',value:(x.match(/'(s|re|ll|t|ve)/g)||[]).length,explain:'Informality marker.'},
   ];
-  const warning = /\b(fuck|shit|bastard|asshole)\b/.test(x) ? 'Profanity detected. The framework was built from dataset agent language, which contains no profanity, so this is outside what the model can assess — flagged as a system limitation.' : null;
+  const warning=/\b(fuck|shit|bastard|asshole|bitch|cunt)\b/.test(x)?'Profanity detected — outside what the model can assess (system limitation), flagged not scored.':null;
   return {sentiment:{neg,neu:Math.max(0,1-neg-0.1),pos:0.1},features:feats,warning};
 }
 function demoScore(list){
-  const n=list.length;
-  if(n<2) return {probability:null,note:'Add at least two turns to evaluate the thread.'};
-  const ag=list.filter(t=>!t.inbound), cu=list.filter(t=>t.inbound);
-  const txt=a=>a.map(t=>t.text.toLowerCase()).join(' ');
-  const defl=/unable|cannot|policy|department|contact/.test(txt(ag));
-  const bur=/kindly|patience|appreciate|flag/.test(txt(ag));
-  const fr=/unacceptable|useless|unbelievable|not good enough/.test(txt(cu));
-  const logit = -1.8 + (defl?0.9:0) + (bur?0.6:0) + (fr?0.7:0);
-  const p=1/(1+Math.exp(-logit));
-  const C=[];
+  const n=list.length; if(n<2) return {probability:null,note:'Add at least two turns.'};
+  const ag=list.filter(t=>!t.inbound),cu=list.filter(t=>t.inbound);
+  const j=a=>a.map(t=>t.text.toLowerCase()).join(' ');
+  const defl=/unable|cannot|policy|department|contact/.test(j(ag));
+  const bur=/kindly|patience|appreciate|flag/.test(j(ag));
+  const fr=/unacceptable|useless|unbelievable|not good enough/.test(j(cu));
+  const logit=-1.8+(defl?0.9:0)+(bur?0.6:0)+(fr?0.7:0);
+  const p=1/(1+Math.exp(-logit)); const C=[];
   if(defl)C.push({label:'Deflection language (agent)',value:1,contribution:0.9,share:34,explain:'Agent used deflection vocabulary.'});
   if(bur)C.push({label:'Bureaucratic language (agent)',value:1,contribution:0.6,share:23,explain:'Agent used formulaic reassurance.'});
   if(fr)C.push({label:'Frustration terms (customer)',value:1,contribution:0.7,share:27,explain:'Customer used strong negative vocabulary.'});
   C.push({label:'Agent template similarity',value:0,contribution:-0.4,share:16,explain:'Low repetition between agent turns.'});
-  const gate = n<4 ? 'Fewer than 4 turns: the model was trained on completed threads, so this probability is extrapolation — indicative only.' : null;
+  const gate=n<4?'Fewer than 4 turns: the model was trained on completed threads, so this is extrapolation — indicative only.':null;
   return {probability:p,contributions:C,gate_warning:gate};
 }
 
+/* ===================== init / wiring ===================== */
 async function fetchRoot(){const d=await api('/api/root');return d?d.opening_text:DEMO_ROOTS[Math.floor(Math.random()*DEMO_ROOTS.length)];}
 async function fetchMiddle(){const d=await api('/api/middle');return d||DEMO_MIDDLE;}
 
 if(MODE==='middle'){
-  (async function(){ middle=await fetchMiddle(); renderChat(); })();
-  document.getElementById('evalBtn').onclick=evalReply;
+  (async function(){ middle=await fetchMiddle(); renderMiddle(); })();
+  document.getElementById('submitReply').onclick=submitReply;
   document.getElementById('revealBtn').onclick=reveal;
   document.getElementById('newThread').onclick=async()=>{
-    middle=await fetchMiddle(); selected=-1; renderChat();
+    middle=await fetchMiddle(); selected=-1; renderMiddle();
     document.getElementById('reply').value='';
-    document.getElementById('tweetPanel').innerHTML='<p class="empty">Click any message on the left to analyse it.</p>';
-    document.getElementById('threadPanel').innerHTML='<p class="empty">Write a reply and click evaluate.</p>';
-    document.getElementById('revealZone').innerHTML='';
-    document.getElementById('tweetWho').textContent='';
+    clearTweet();
+    document.getElementById('threadPanel').innerHTML='<p class="empty">Submit a reply to read the thread.</p>';
+    document.getElementById('realTweetWrap').style.display='none';
+    document.getElementById('realThreadWrap').style.display='none';
   };
 }else{
-  function setSrc(ds){document.getElementById('srcDataset').classList.toggle('on',ds);
-    document.getElementById('srcManual').classList.toggle('on',!ds);}
-  (async function(){ turns=[{inbound:true,text:await fetchRoot(),gap_min:0}]; renderChat(); })();
-  document.getElementById('addAgent').onclick=()=>{turns.push({inbound:false,text:'',gap_min:8});renderChat();};
-  document.getElementById('addCust').onclick =()=>{turns.push({inbound:true, text:'',gap_min:5});renderChat();};
-  document.getElementById('srcManual').onclick=()=>{setSrc(false);turns=[{inbound:true,text:'',gap_min:0}];selected=-1;renderChat();};
-  document.getElementById('srcDataset').onclick=async()=>{setSrc(true);turns=[{inbound:true,text:await fetchRoot(),gap_min:0}];selected=-1;renderChat();};
-  document.getElementById('shuffleRoot').onclick=async()=>{if(turns[0])turns[0].text=await fetchRoot();renderChat();};
-  document.getElementById('evalBtn').onclick=()=>evaluate(null);
+  let source='dataset';
+  function setSrc(s){source=s;
+    document.getElementById('srcDataset').classList.toggle('on',s==='dataset');
+    document.getElementById('srcManual').classList.toggle('on',s==='manual');}
+  async function seed(){
+    selected=-1; clearTweet();
+    document.getElementById('threadPanel').innerHTML='<p class="empty">Submit a second turn to read the thread.</p>';
+    if(source==='dataset'){
+      turns=[{inbound:true,text:await fetchRoot(),draft:'',gap_min:0,status:'object',opener:true,source:'dataset',isNew:false}];
+    }else{
+      turns=[{inbound:true,text:'',draft:'',gap_min:0,status:'editing',opener:true,source:'manual',isNew:false}];
+    }
+    renderStart();
+  }
+  (async function(){ await seed(); })();
+  document.getElementById('addAgent').onclick=()=>{turns.push({inbound:false,text:'',draft:'',gap_min:8,status:'editing',opener:false,source:'manual',isNew:true});renderStart();};
+  document.getElementById('addCust').onclick =()=>{turns.push({inbound:true, text:'',draft:'',gap_min:5,status:'editing',opener:false,source:'manual',isNew:true});renderStart();};
+  document.getElementById('srcDataset').onclick=async()=>{setSrc('dataset');await seed();};
+  document.getElementById('srcManual').onclick =async()=>{setSrc('manual'); await seed();};
+  document.getElementById('resetBtn').onclick=async()=>{await seed();};
 }
 </script>
 {% endblock %}

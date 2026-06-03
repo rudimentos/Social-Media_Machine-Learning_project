@@ -33,14 +33,14 @@
   .nav a .ic{width:16px;display:inline-block;text-align:center;opacity:.7}
   .nav a:hover{background:rgba(255,255,255,.05)}
   .nav a.active{background:var(--rust);color:#fff}.nav a.active .ic{opacity:1}
-  details.drop{border-radius:9px}
-  details.drop>summary{display:flex;align-items:center;gap:11px;list-style:none;cursor:pointer;color:var(--side-ink);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:9px}
-  details.drop>summary::-webkit-details-marker{display:none}
-  details.drop>summary:hover{background:rgba(255,255,255,.05)}
-  details.drop>summary .chev{margin-left:auto;font-size:10px;opacity:.6;transition:transform .2s}
-  details.drop[open]>summary .chev{transform:rotate(90deg)}
-  details.drop .sub{display:flex;flex-direction:column;gap:2px;margin:2px 0 4px 14px;padding-left:10px;border-left:1px solid var(--side-line)}
-  details.drop .sub a{font-size:12px;padding:8px 10px}
+  .subnav{display:flex;flex-direction:column;gap:2px;margin:2px 0 4px 14px;padding-left:10px;border-left:1px solid var(--side-line)}
+  .subnav a{font-size:12px;padding:8px 10px}
+  .hbtns{display:flex;gap:8px}
+  .hbtn{font-family:var(--mono);font-size:12px;text-decoration:none;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 13px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;transition:background .15s,color .15s}
+  .hbtn:hover{background:var(--ink);color:var(--canvas)}
+  .modesel{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card);margin-bottom:24px}
+  .modesel a{font-family:var(--mono);font-size:12.5px;text-decoration:none;color:var(--muted);padding:9px 18px}
+  .modesel a.on{background:var(--ink);color:var(--canvas)}
   .side-foot{margin-top:auto;font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--side-mut);border-top:1px solid var(--side-line);padding-top:16px}
 
   .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:100vh}
@@ -54,8 +54,8 @@
   @media(max-width:920px){
     body{flex-direction:column}
     .side{width:auto;flex:none;height:auto;position:static;flex-direction:row;align-items:center;padding:14px 18px;gap:16px;flex-wrap:wrap}
-    .brand{margin:0}.side-foot,.nav-h{display:none}.nav{flex-direction:row;margin-left:auto;flex-wrap:wrap}
-    details.drop .sub{margin-left:0;border:0;padding-left:0;flex-direction:row}
+    .brand{margin:0}.side-foot,.nav-h{display:none}.nav{flex-direction:row;margin-left:auto;flex-wrap:wrap;align-items:center}
+    .subnav{flex-direction:row;margin:0;border:0;padding:0}
     .main{min-height:0}.topbar{padding:18px 22px}.content{padding:22px}.disclaimer{padding:18px 22px}
   }
   @keyframes fade{from{opacity:0}to{opacity:1}}
@@ -74,13 +74,13 @@
     <nav class="nav">
       <a href="/" class="{% if active=='home' %}active{% endif %}"><span class="ic">⌂</span> Home</a>
       <a href="/dashboard" class="{% if active=='dashboard' %}active{% endif %}"><span class="ic">▦</span> Dashboard</a>
-      <details class="drop" {% if active=='predictor' %}open{% endif %}>
-        <summary><span class="ic">◆</span> Predictor <span class="chev">▸</span></summary>
-        <div class="sub">
-          <a href="/predictor/start" class="{% if submode=='start' %}active{% endif %}">From the start</a>
-          <a href="/predictor/middle" class="{% if submode=='middle' %}active{% endif %}">Jump into the middle</a>
-        </div>
-      </details>
+      <a href="/predictor" class="{% if active=='predictor' %}active{% endif %}"><span class="ic">◆</span> Predictor</a>
+      {% if active=='predictor' %}
+      <div class="subnav">
+        <a href="/predictor/start" class="{% if submode=='start' %}active{% endif %}">From the start</a>
+        <a href="/predictor/middle" class="{% if submode=='middle' %}active{% endif %}">Jump into the middle</a>
+      </div>
+      {% endif %}
     </nav>
     <div class="side-foot">Escalation detection framework<br>Linguistic &amp; conversation-level<br>analysis · prototype</div>
   </aside>

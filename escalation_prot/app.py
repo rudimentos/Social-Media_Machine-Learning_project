@@ -193,7 +193,7 @@ def dashboard():
 
 @app.route("/predictor")
 def predictor_root():
-    return redirect("/predictor/start")
+    return render_template("predictor_home.html")
 
 
 @app.route("/predictor/<submode>")

@@ -181,11 +181,15 @@ function renderDist(){
   const d=DATA.distributions[+document.getElementById('distSel').value];
   function box(stats,name,color){return {type:'box',name,orientation:'h',
     q1:[stats.q1],median:[stats.median],q3:[stats.q3],lowerfence:[stats.lo],upperfence:[stats.hi],
-    mean:[stats.mean], marker:{color}, line:{color}, y:[name]};}
+    mean:[stats.mean], marker:{color}, line:{color}, y:[name], hoverinfo:'skip', showlegend:false};}
+  function pt(stats,name,color){return {type:'scatter',mode:'markers',x:[stats.median],y:[name],
+    marker:{color,size:6}, showlegend:false,
+    hovertemplate:`<b>${name}</b><br>median %{x}<br>q1 ${stats.q1} · q3 ${stats.q3}<br>mean ${stats.mean}<extra></extra>`};}
   Plotly.newPlot('distChart',[
     box(d.esc,'Escalated',RUST), box(d.non,'Resolved',TEAL),
-  ], L({showlegend:false, xaxis:{title:d.label,gridcolor:'#ece6da'},
-    yaxis:{automargin:true}, margin:{l:80,r:14,t:8,b:45}}), CFG);
+    pt(d.esc,'Escalated',RUST), pt(d.non,'Resolved',TEAL),
+  ], L({showlegend:false, hovermode:'closest', xaxis:{title:d.label,gridcolor:'#ece6da'},
+    yaxis:{automargin:true}, margin:{l:90,r:14,t:8,b:45}}), CFG);
 }
 
 /* ---- ROC (computed from eval arrays) ---- */
