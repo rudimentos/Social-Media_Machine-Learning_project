@@ -2,12 +2,12 @@
 {% set active = 'predictor' %}
 {% block title %}Predictor · Escalation Lab{% endblock %}
 {% block page_title %}Predictor{% endblock %}
-{% block page_sub %}Step through a support conversation and read the model{% endblock %}
 {% block topbar_right %}<div class="hbtns"><a class="hbtn" href="/">⌂ Home</a></div>{% endblock %}
 
 {% block style_extra %}
-  .body{max-width:720px;margin-bottom:32px}
+  .body{max-width:760px;margin-bottom:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 28px;box-shadow:var(--shadow)}
   .body p{font-size:16px;line-height:1.65;color:#3a352f;margin:0 0 14px}
+  .body p:last-child{margin-bottom:0}
   .body h3{font-family:var(--serif);font-size:15px;font-weight:600;margin:22px 0 6px}
   .body .small{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.6}
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:760px}
@@ -23,20 +23,20 @@
 
 {% block content %}
 <div class="body">
-  <p>The predictor turns the escalation framework into something you can poke at. You compose or
-    step through a support conversation, and for each message it reports the <b>linguistic and
-    semantic features</b> the analysis is built on — sentiment, deflection and bureaucratic language,
-    passive voice, negation, intent and frustration terms, and so on.</p>
+  <p>The predictor allows you to practice avoiding escalation-associated language or behavior when engaging with customers. You can enter own starting messages or 
+    take the pre-existing messages from the dataset, and for each message it reports the <b>linguistic and
+    semantic features</b> the analysis is built on features like sentiment, deflection and bureaucratic language,
+    passive voice, negation, intent and frustration terms and more.</p>
   <p>Once a conversation has at least two turns, it also reads the whole thread through the trained
     XGBoost model and shows the <b>probability of an ineffective resolution</b>, broken down by each
     feature's SHAP contribution — how much, and in which direction, it pushed that prediction.</p>
   <h3>Two ways to use it</h3>
-  <p class="small">FROM THE START — open with a real dataset message or write your own, then build the
+  <p class="body">FROM THE START — open with a real dataset message or write your own, then build the
     thread turn by turn.<br>
     JUMP INTO THE MIDDLE — a real thread is drawn at random; you see the first three turns, write the
     agent's reply, and then reveal what actually happened to compare against.</p>
   <h3>Read with caution</h3>
-  <p class="small">Everything here describes association in one dataset, not causation, and the model
+  <p class="body">Everything here describes association in one dataset, not causation, and the model
     was trained on completed threads — short or in-progress conversations are extrapolation and are
     flagged as such. See the full disclaimer below.</p>
 </div>

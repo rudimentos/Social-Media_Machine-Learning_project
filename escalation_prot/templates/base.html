@@ -6,16 +6,16 @@
 <title>{% block title %}Escalation Lab{% endblock %}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 {% block head_extra %}{% endblock %}
 <style>
   :root{
-    --canvas:#f4f1ea; --ink:#1c1a17; --muted:#6c655b; --line:#d8d2c6;
-    --card:#fbf9f4; --card-2:#ffffff;
+    --canvas:#e1b995; --ink:#1c1a17; --muted:#6c655b; --line:#d8d2c6;
+    --card:#FBF9F4; --card-2:#fbf9f4;
     --rust:#9a3b2e; --rust-soft:#c97b6a; --teal:#3c5a63; --teal-soft:#6f95a0; --amber:#b8862f;
-    --side:#181613; --side-line:#2e2a25; --side-ink:#cfc7ba; --side-mut:#8a8175;
+    --side:#614033; --side-line:#2e2a25; --side-ink:#cfc7ba; --side-mut:#8a8175;
     --shadow:0 1px 0 rgba(28,26,23,.05), 0 10px 34px rgba(28,26,23,.07);
-    --serif:'Fraunces',Georgia,serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --serif:'Roboto',sans-serif; --mono:'Roboto Mono',ui-monospace,monospace;
   }
   *{box-sizing:border-box}
   html,body{margin:0;min-height:100%}
@@ -67,7 +67,6 @@
 <body>
   <aside class="side">
     <a class="brand" href="/">
-      <div class="mark"></div>
       <div><h1>Escalation Lab</h1><small>Support Analytics</small></div>
     </a>
     <div class="nav-h">Workspace</div>
