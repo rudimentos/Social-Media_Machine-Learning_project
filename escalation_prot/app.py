@@ -32,9 +32,7 @@ import features
 ART = "artifacts"
 app = Flask(__name__)
 
-# ---------------------------------------------------------------------------
 # Optional model artifacts (thread-level probability + SHAP)
-# ---------------------------------------------------------------------------
 MODEL = SCALER = FEATURE_COLUMNS = None
 _EXPLAINER = None
 try:
@@ -61,9 +59,9 @@ def _get_explainer():
     return _EXPLAINER
 
 
-# ---------------------------------------------------------------------------
+
 # Feature explanations (thread-level)
-# ---------------------------------------------------------------------------
+
 EXPLAIN = {
     "inb_turns": "Number of customer messages.",
     "out_turns": "Number of agent messages.",
@@ -94,24 +92,24 @@ EXPLAIN = {
     "started_out_of_hours": "Whether the thread started outside 08:00–18:00.",
 }
 
-# ---------------------------------------------------------------------------
+
 # Profanity (non-blocking warning only — see disclaimer)
-# ---------------------------------------------------------------------------
-PROFANITY = {"fuck", "fucking", "shit", "bastard", "asshole", "arsehole",
+
+PROFANITY = {"fuck", "fucking", "shit", "bastard", "asshole", "fucker", "shitty", "arsehole",
              "bollocks", "bitch", "dickhead", "wanker", "twat", "cunt"}
 _PROF_RE = re.compile(r"\b(" + "|".join(PROFANITY) + r")\b", re.I)
 _PROF_MSG = ("Profanity detected. The framework was built from dataset agent language, which "
              "contains no profanity, so abusive wording is outside what the model can assess — "
-             "flagged here as a system limitation, not scored.")
+             "a system limitation.")
 
 
 def _profanity(text):
     return bool(_PROF_RE.search(text or ""))
 
 
-# ---------------------------------------------------------------------------
+
 # Thread data (real export or bundled sample)
-# ---------------------------------------------------------------------------
+
 _BUNDLED = {
     "roots": [
         {"opening_text": "I've been charged twice for my subscription this month. Can you sort this out?"},
@@ -145,9 +143,8 @@ else:
     print("[startup] no predictor_threads.json — using bundled sample")
 
 
-# ---------------------------------------------------------------------------
+
 # Lazy sentiment model
-# ---------------------------------------------------------------------------
 _SENT = {}
 
 def _ensure_sentiment():
@@ -178,9 +175,7 @@ def score_sentiment(text):
     return float(probs[0]), float(probs[1]), float(probs[2])
 
 
-# ---------------------------------------------------------------------------
 # Pages
-# ---------------------------------------------------------------------------
 @app.route("/")
 def home():
     return render_template("home.html")
@@ -203,9 +198,7 @@ def predictor(submode):
     return render_template("predictor.html", submode=submode)
 
 
-# ---------------------------------------------------------------------------
 # Data API
-# ---------------------------------------------------------------------------
 @app.route("/api/root")
 def api_root():
     return jsonify(random.choice(THREADS.get("roots") or _BUNDLED["roots"]))
@@ -216,9 +209,9 @@ def api_middle():
     return jsonify(random.choice(THREADS.get("middles") or _BUNDLED["middles"]))
 
 
-# ---------------------------------------------------------------------------
+
 # Tweet-level analysis
-# ---------------------------------------------------------------------------
+
 def _tweet_report(text, inbound):
     f = features.extract_tweet_features(text, inbound)
     neg, neu, pos = score_sentiment(text)
@@ -270,9 +263,9 @@ def api_tweet():
     return jsonify(_tweet_report(text, bool(p.get("inbound"))))
 
 
-# ---------------------------------------------------------------------------
+
 # Thread-level scoring: model probability + SHAP
-# ---------------------------------------------------------------------------
+
 @app.route("/api/score", methods=["POST"])
 def api_score():
     p = request.get_json(force=True)
@@ -362,9 +355,9 @@ def _pretty(col):
     return _PRETTY.get(col, col)
 
 
-# ---------------------------------------------------------------------------
+
 # Dashboard data
-# ---------------------------------------------------------------------------
+
 def _build_bundled_dashboard():
     import numpy as np
     rng = np.random.default_rng(42)

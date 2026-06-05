@@ -1,20 +1,3 @@
-"""
-features.py — single source of truth for feature extraction.
-
-This module mirrors STEP 5 (tweet-level spaCy features) and STEP 7 (thread-level
-aggregation) from the training pipeline. The Flask prototype imports it so that a
-pasted conversation is turned into exactly the same 27-column feature vector the
-XGBoost model was trained on.
-
-PARITY REQUIREMENT (read this):
-The model and StandardScaler were fit on values produced by your training code.
-If any function here computes a feature differently, the scaler and model receive
-shifted inputs and live predictions drift from reported test performance. The
-robust fix is to make your training notebook IMPORT these same functions instead
-of keeping a second copy. Three definitions below are marked CONFIRM because they
-were not fully specified in the handoff — verify them against your training code.
-"""
-
 from collections import Counter
 
 import numpy as np
