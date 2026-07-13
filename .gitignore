@@ -1,4 +1,4 @@
-twcs.csv
+.gitignore twcs.csv
 shap_summary.png
 shap_waterfall.png
 shap_bar.png
